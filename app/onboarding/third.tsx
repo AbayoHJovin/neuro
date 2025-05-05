@@ -3,7 +3,6 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -140,10 +139,7 @@ export default function LoginScreen() {
   };
 
   const handleForgotPassword = () => {
-    Alert.alert(
-      "Forgot Password",
-      "A password reset link would be sent to your email."
-    );
+    router.push("/onboarding/reset-password");
   };
 
   return (

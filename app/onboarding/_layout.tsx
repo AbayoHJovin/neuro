@@ -6,6 +6,7 @@ export default function OnboardingLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="second" />
       <Stack.Screen name="third" />
+      <Stack.Screen name="reset-password" />
     </Stack>
   );
 }
