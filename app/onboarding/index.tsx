@@ -1,22 +1,16 @@
+import Button from "@/components/Button";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import {
-  Pressable,
-  SafeAreaView,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { SafeAreaView, Text, useWindowDimensions, View } from "react-native";
 
 export default function OnboardingFirst() {
   const router = useRouter();
   const { height } = useWindowDimensions();
 
   const handleGetStarted = () => {
-    // For now, we'll navigate to the tabs directly
-    // This will be replaced once the second screen is fully implemented
-    router.replace("/(tabs)");
+    // Navigate to the signup screen
+    router.push("/onboarding/second");
   };
 
   return (
@@ -86,12 +80,7 @@ export default function OnboardingFirst() {
 
       {/* Button */}
       <View className="px-6 mb-10">
-        <Pressable
-          onPress={handleGetStarted}
-          className="bg-[#B8A625] rounded-full py-4 items-center"
-        >
-          <Text className="text-white text-lg font-medium">Get Started</Text>
-        </Pressable>
+        <Button title="Get Started" onPress={handleGetStarted} />
       </View>
     </SafeAreaView>
   );

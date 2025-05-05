@@ -4,10 +4,10 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { SplashScreen as RouterSplashScreen, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import "../global.css";
 
@@ -18,23 +18,33 @@ SplashScreen.preventAutoHideAsync().catch(() => {
   /* reloading the app might trigger some race conditions, ignore them */
 });
 
+// Hide the router splash screen (different from the native splash screen)
+RouterSplashScreen.hideAsync();
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
+  const [splashReady, setSplashReady] = useState(false);
 
   useEffect(() => {
     if (loaded) {
-      // Hide the splash screen once the assets are loaded
-      SplashScreen.hideAsync().catch(() => {
-        /* reloading the app might trigger some race conditions, ignore them */
-      });
+      // Artificial delay to keep the splash screen visible for a bit
+      const splashTimer = setTimeout(() => {
+        setSplashReady(true);
+        // Hide the splash screen after the delay
+        SplashScreen.hideAsync().catch(() => {
+          /* reloading the app might trigger some race conditions, ignore them */
+        });
+      }, 3000); // 3 seconds delay
+
+      return () => clearTimeout(splashTimer);
     }
   }, [loaded]);
 
-  // If fonts are not loaded, we keep the splash screen visible
-  if (!loaded) {
+  // If fonts are not loaded or we're still showing splash, keep splash screen visible
+  if (!loaded || !splashReady) {
     return null;
   }
 
