@@ -197,7 +197,6 @@ export default function LoginScreen() {
 
             <InputField
               label="Password"
-              placeholder="Enter your password"
               value={password}
               onChangeText={(text) => {
                 setPassword(text);
