@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -17,21 +18,13 @@ import Button from "@/components/Button";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import InputField from "@/components/InputField";
 
-// Mock data for simulation
-const MOCK_USER = {
-  email: "test@example.com",
-  password: "password123",
-};
-
-export default function SignupScreen() {
+export default function LoginScreen() {
   const router = useRouter();
-  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState("");
   const [errors, setErrors] = useState({
-    fullName: "",
     email: "",
     password: "",
   });
@@ -39,15 +32,9 @@ export default function SignupScreen() {
   const validateInputs = () => {
     let isValid = true;
     const newErrors = {
-      fullName: "",
       email: "",
       password: "",
     };
-
-    if (!fullName.trim()) {
-      newErrors.fullName = "Full name is required";
-      isValid = false;
-    }
 
     if (!email.trim()) {
       newErrors.email = "Email is required";
@@ -60,19 +47,13 @@ export default function SignupScreen() {
     if (!password.trim()) {
       newErrors.password = "Password is required";
       isValid = false;
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-      isValid = false;
-    } else if (!/(?=.*[0-9])/.test(password)) {
-      newErrors.password = "Password must contain at least one number";
-      isValid = false;
     }
 
     setErrors(newErrors);
     return isValid;
   };
 
-  const handleSignUp = async () => {
+  const handleLogin = async () => {
     // Clear any previous API errors
     setApiError("");
 
@@ -85,13 +66,12 @@ export default function SignupScreen() {
 
     try {
       // Try to make the API call
-      const response = await fetch("http://localhost:5000/api/signup", {
+      const response = await fetch("http://localhost:5000/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          fullName,
           email,
           password,
         }),
@@ -102,37 +82,40 @@ export default function SignupScreen() {
       if (response.ok) {
         // Set onboarding as completed
         await AsyncStorage.setItem("hasCompletedOnboarding", "true");
-        // Navigate to login screen after successful signup
-        router.replace("/onboarding/third");
+        // Handle successful login
+        router.replace("/(tabs)");
       } else {
         // Handle API error responses
-        setApiError(data.message || "Signup failed. Please try again.");
+        setApiError(
+          data.message || "Login failed. Please check your credentials."
+        );
         setIsLoading(false);
       }
     } catch (error) {
       console.log("Using mock data, API unreachable:", error);
 
-      // For demo - simulate some errors based on email
-      if (email === "existing@example.com") {
-        setApiError("User with this email already exists");
-        setIsLoading(false);
-        return;
+      // For demo - simulate login with test credentials
+      // Use email: test@example.com and password: password123 for successful login
+      if (email === "test@example.com" && password === "password123") {
+        setTimeout(async () => {
+          await AsyncStorage.setItem("hasCompletedOnboarding", "true").catch(
+            (err) =>
+              console.error("Error setting onboarding completion status:", err)
+          );
+          setIsLoading(false);
+          router.replace("/(tabs)");
+        }, 1500);
+      } else {
+        // Simulate failed login
+        setTimeout(() => {
+          setApiError("Invalid email or password");
+          setIsLoading(false);
+        }, 1500);
       }
-
-      // Simulate API call with mock data for successful flow
-      setTimeout(async () => {
-        // Set onboarding as completed even in mock mode
-        await AsyncStorage.setItem("hasCompletedOnboarding", "true").catch(
-          (err) =>
-            console.error("Error setting onboarding completion status:", err)
-        );
-        setIsLoading(false);
-        router.replace("/onboarding/third");
-      }, 1500);
     }
   };
 
-  const handleGoogleSignUp = async () => {
+  const handleGoogleLogin = async () => {
     // Clear any previous API errors
     setApiError("");
     setIsLoading(true);
@@ -143,18 +126,24 @@ export default function SignupScreen() {
       await AsyncStorage.setItem("hasCompletedOnboarding", "true");
       setTimeout(() => {
         setIsLoading(false);
-        router.replace("/onboarding/third");
+        router.replace("/(tabs)");
       }, 1500);
     } catch (error) {
       console.error("Error setting onboarding completion status:", error);
-      setApiError("Google sign-in failed. Please try again.");
+      setApiError("Google login failed. Please try again.");
       setIsLoading(false);
     }
   };
 
-  const goToLogin = () => {
-    // Navigate to login screen
-    router.push("/onboarding/third");
+  const goToRegister = () => {
+    router.push("/onboarding/second");
+  };
+
+  const handleForgotPassword = () => {
+    Alert.alert(
+      "Forgot Password",
+      "A password reset link would be sent to your email."
+    );
   };
 
   return (
@@ -179,7 +168,7 @@ export default function SignupScreen() {
               Welcome To NeuroLab
             </Text>
             <Text className="text-white text-center text-lg opacity-80">
-              Sign up to track your mental status
+              Login to get updates
             </Text>
           </View>
 
@@ -191,23 +180,9 @@ export default function SignupScreen() {
           ) : null}
 
           {/* Form fields */}
-          <View className="mt-6 px-8 w-full">
-            <InputField
-              label="Full Names"
-              placeholder="Enter your full name"
-              value={fullName}
-              onChangeText={(text) => {
-                setFullName(text);
-                if (errors.fullName && text.trim()) {
-                  setErrors({ ...errors, fullName: "" });
-                }
-              }}
-              error={errors.fullName}
-            />
-
+          <View className="mt-8 px-8 w-full">
             <InputField
               label="Email"
-              placeholder="Enter your email"
               value={email}
               onChangeText={(text) => {
                 setEmail(text);
@@ -236,26 +211,22 @@ export default function SignupScreen() {
               containerStyle="mb-2"
             />
 
+            <View className="items-end mb-6">
+              <Pressable onPress={handleForgotPassword}>
+                <Text className="text-white opacity-80">Forgot Password?</Text>
+              </Pressable>
+            </View>
+
             <Button
-              title="Sign Up"
-              onPress={handleSignUp}
+              title="Login"
+              onPress={handleLogin}
               isLoading={isLoading}
               disabled={isLoading}
             />
           </View>
 
-          {/* Form requirements info */}
-          <View className="mt-4 px-8">
-            <Text className="text-gray-400 text-xs">
-              • Password must be at least 6 characters
-            </Text>
-            <Text className="text-gray-400 text-xs">
-              • Password must contain at least one number
-            </Text>
-          </View>
-
           {/* Or sign in section */}
-          <View className="mt-6 px-8">
+          <View className="mt-8 px-8">
             <View className="flex-row items-center justify-center">
               <View className="h-[1px] bg-white opacity-20 flex-1" />
               <Text className="text-white mx-4">Or Sign In</Text>
@@ -265,17 +236,14 @@ export default function SignupScreen() {
 
           {/* Google sign in button */}
           <View className="mt-6 px-8">
-            <GoogleSignInButton onPress={handleGoogleSignUp} />
+            <GoogleSignInButton onPress={handleGoogleLogin} />
           </View>
 
-          {/* Already have account section */}
+          {/* Don't have account section */}
           <View className="mt-8 mb-6 items-center justify-center flex-row">
-            <Text className="text-white">Already have an account? </Text>
-            <Pressable
-              onPress={goToLogin}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Text className="text-[#3D5AF1] font-medium">Login</Text>
+            <Text className="text-white">Don&apos;t have an account? </Text>
+            <Pressable onPress={goToRegister}>
+              <Text className="text-[#3D5AF1] font-medium">Register</Text>
             </Pressable>
           </View>
         </ScrollView>

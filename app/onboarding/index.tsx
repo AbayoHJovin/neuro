@@ -1,3 +1,5 @@
+import C from "@/assets/svg/c";
+import NeuroLabLogo from "@/assets/svg/Logo";
 import Button from "@/components/Button";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -29,36 +31,21 @@ export default function OnboardingFirst() {
       </View>
 
       {/* Top logo section */}
-      <View className="flex-1 items-center justify-center mt-16">
-        <View className="w-36 h-36 mb-4 items-center justify-center">
-          {/* NeuroLab logo - a circuit-like brain icon */}
-          <View className="w-32 h-32 rounded-full border-2 border-[#B8A625] items-center justify-center">
-            <View className="absolute w-full h-full">
-              <View className="absolute w-2 h-2 rounded-full bg-[#B8A625] left-1/4 top-1/4" />
-              <View className="absolute w-2 h-2 rounded-full bg-[#B8A625] right-1/4 top-1/4" />
-              <View className="absolute w-2 h-2 rounded-full bg-[#B8A625] left-1/4 bottom-1/4" />
-              <View className="absolute w-2 h-2 rounded-full bg-[#B8A625] right-1/4 bottom-1/4" />
-              <View className="absolute w-4 h-4 rounded-full bg-[#B8A625] left-1/2 top-1/2 -ml-2 -mt-2" />
-
-              {/* Connection lines */}
-              <View className="absolute w-[1px] h-16 bg-[#B8A625] left-1/2 -ml-[0.5px] top-0" />
-              <View className="absolute w-[1px] h-16 bg-[#B8A625] left-1/2 -ml-[0.5px] bottom-0" />
-              <View className="absolute w-16 h-[1px] bg-[#B8A625] top-1/2 -mt-[0.5px] left-0" />
-              <View className="absolute w-16 h-[1px] bg-[#B8A625] top-1/2 -mt-[0.5px] right-0" />
-            </View>
-          </View>
+      <View className="flex-row items-center justify-center mt-16">
+        <View className="w-36 h-36 mr-0 items-center justify-center">
+          <NeuroLabLogo />
         </View>
         <Text className="text-white text-4xl font-bold">NeuroLab</Text>
       </View>
 
       {/* Middle section with welcome text */}
       <View className="flex-1 items-center justify-center px-8">
-        <View className="w-10 h-10 mb-4 items-center justify-center">
-          <Text className="text-[#B8A625] text-6xl font-light">C</Text>
+        <View className="flex-row items-center justify-center">
+          <View className="w-20 h-20 mb-4 items-center justify-center">
+            <C />
+          </View>
+          <Text className="text-white text-2xl text-center">Welcome,</Text>
         </View>
-        <Text className="text-white text-2xl font-medium text-center">
-          Welcome,
-        </Text>
 
         <Text className="text-white text-3xl font-bold text-center mt-5">
           Track your
