@@ -14,7 +14,8 @@ import "../global.css";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import CustomSplashScreen from "@/screens/Splash/SplashScreen";
 
-// Keep the splash screen visible while we fetch resources
+// Prevent the native splash screen from auto-hiding 
+// This is important - we'll manually hide it once our custom splash is ready
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* reloading the app might trigger some race conditions, ignore them */
 });
@@ -27,16 +28,14 @@ export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
-  const [splashReady, setSplashReady] = useState(false);
   const [showCustomSplash, setShowCustomSplash] = useState(true);
 
   useEffect(() => {
     if (loaded) {
-      // Hide the native splash screen
+      // Immediately hide any remaining native splash screen
       SplashScreen.hideAsync().catch(() => {
         /* reloading the app might trigger some race conditions, ignore them */
       });
-      setSplashReady(true);
     }
   }, [loaded]);
 
@@ -44,12 +43,12 @@ export default function RootLayout() {
     setShowCustomSplash(false);
   };
 
-  // If fonts are not loaded, keep native splash screen visible
-  if (!loaded || !splashReady) {
-    return null;
+  // If fonts are not loaded, show our custom splash screen as a loading indicator
+  if (!loaded) {
+    return <CustomSplashScreen />;
   }
 
-  // If fonts are loaded but we're still showing custom splash, render it
+  // If fonts are loaded but we're still in the splash phase, show the animated splash
   if (showCustomSplash) {
     return <CustomSplashScreen onAnimationComplete={handleSplashComplete} />;
   }

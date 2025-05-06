@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, View, Text, Dimensions, Animated } from 'react-native';
-import NeuroLabLogo from '@/assets/svg/Logo';
-import ScreenContainer from '@/components/common/ScreenContainer';
+import NeuroLabLogo from "@/assets/svg/Logo";
+import ScreenContainer from "@/components/common/ScreenContainer";
+import React, { useEffect } from "react";
+import { Animated, Dimensions, StyleSheet } from "react-native";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 interface SplashScreenProps {
   onAnimationComplete?: () => void;
@@ -13,42 +13,47 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onAnimationComplete }) => {
   // Animation values
   const opacity = React.useRef(new Animated.Value(0)).current;
   const scale = React.useRef(new Animated.Value(0.8)).current;
-  
+
   useEffect(() => {
-    // Start animations
-    Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scale, {
-        toValue: 1,
-        friction: 7,
-        tension: 40,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    // Add a small delay to ensure the component is properly mounted
+    const animationTimeout = setTimeout(() => {
+      // Start animations
+      Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scale, {
+          toValue: 1,
+          friction: 7,
+          tension: 40,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, 100);
 
-    // Set timer to trigger completion callback
-    const timer = setTimeout(() => {
-      if (onAnimationComplete) {
+    // Only set the completion timer if we have a callback to execute
+    let completionTimer: ReturnType<typeof setTimeout> | null = null;
+    if (onAnimationComplete) {
+      completionTimer = setTimeout(() => {
         onAnimationComplete();
-      }
-    }, 3000);
+      }, 3000);
+    }
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(animationTimeout);
+      if (completionTimer) clearTimeout(completionTimer);
+    };
   }, [onAnimationComplete, opacity, scale]);
 
   return (
     <ScreenContainer
       contentStyle={styles.contentContainer}
+      disableSafeArea={true}
     >
-      <Animated.View 
-        style={[
-          styles.logoContainer, 
-          { opacity, transform: [{ scale }] }
-        ]}
+      <Animated.View
+        style={[styles.logoContainer, { opacity, transform: [{ scale }] }]}
       >
         <NeuroLabLogo />
       </Animated.View>
@@ -64,26 +69,26 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onAnimationComplete }) => {
 
 const styles = StyleSheet.create({
   contentContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   logoContainer: {
     marginBottom: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     transform: [{ scale: 1.2 }],
   },
   title: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 40,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   subtitle: {
-    color: '#B8A625',
+    color: "#B8A625",
     fontSize: 20,
-    textAlign: 'center',
+    textAlign: "center",
     opacity: 0.9,
   },
 });
