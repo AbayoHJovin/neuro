@@ -1,7 +1,9 @@
 import BrainIcon from "@/components/BrainIcon";
+import { getTestById } from "@/utils/mockData";
 import axios from "axios";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import {
@@ -226,15 +228,60 @@ const RecommendationItem = ({
 export default function AnalyticsScreen() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { testId } = useLocalSearchParams<{ testId: string }>();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:5000/api/analytics");
-        setData(response.data);
+
+        // If we have a testId, fetch specific test data
+        if (testId) {
+          console.log("Loading test with ID:", testId);
+          // Get the test result from mock data
+          const testResult = getTestById(testId);
+
+          if (testResult) {
+            // Transform the test result to match AnalyticsData format
+            const analyticsData: AnalyticsData = {
+              attentionScore: testResult.attentionScore,
+              cognitiveLoad: 100 - testResult.relaxationLevel, // Inverse of relaxation
+              mentalFatigue: testResult.mentalFatigue,
+              relaxationLevel: testResult.relaxationLevel,
+              confidence: 85, // Default confidence level
+              stateDistribution: {
+                focused: 45,
+                relaxed: 25,
+                neutral: 20,
+                distracted: 10,
+              },
+              recommendations: testResult.recommendations || [],
+              timeSeriesData: testResult.waveData
+                ? testResult.waveData.map((value, index) => ({
+                    time: `${index} min`,
+                    value,
+                  }))
+                : MOCK_DATA.timeSeriesData,
+            };
+            setData(analyticsData);
+          } else {
+            console.log("Test not found, using mock data");
+            setData(MOCK_DATA);
+          }
+        } else {
+          // Normal flow - fetch from API or use mock data for a new test
+          try {
+            const response = await axios.get(
+              "http://localhost:5000/api/analytics"
+            );
+            setData(response.data);
+          } catch (error) {
+            console.log("Error fetching data, using mock data instead:", error);
+            setData(MOCK_DATA);
+          }
+        }
       } catch (error) {
-        console.log("Error fetching data, using mock data instead:", error);
+        console.log("General error, using mock data:", error);
         setData(MOCK_DATA);
       } finally {
         setLoading(false);
@@ -242,7 +289,7 @@ export default function AnalyticsScreen() {
     };
 
     fetchData();
-  }, []);
+  }, [testId]);
 
   if (loading) {
     return (
@@ -269,8 +316,8 @@ export default function AnalyticsScreen() {
             />
             <Text style={styles.headerTitle}>NeurAi</Text>
           </View> */}
-           <View style={styles.header}>
-            <BrainIcon size={32} color="#3563E9" filled={true}/>
+          <View style={styles.header}>
+            <BrainIcon size={32} color="#3563E9" filled={true} />
             <Text style={styles.headerTitle}>NeurAi</Text>
           </View>
           <View style={styles.profileIconContainer}>
@@ -413,7 +460,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 18,
     fontWeight: "bold",
-    marginLeft:8,
+    marginLeft: 8,
   },
   profileIconContainer: {
     width: 36,
@@ -469,8 +516,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,
-    borderColor:"#3563E9",
-    borderWidth:1,
+    borderColor: "#3563E9",
+    borderWidth: 1,
     // backgroundColor: "rgba(255, 255, 255, 0.05)",
     borderRadius: 16,
     padding: 16,
