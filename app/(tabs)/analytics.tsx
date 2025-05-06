@@ -3,15 +3,17 @@ import { getTestById } from "@/utils/mockData";
 import axios from "axios";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Dimensions,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import Animated, {
@@ -21,10 +23,12 @@ import Animated, {
 } from "react-native-reanimated";
 import Svg, {
   Circle,
+  Line,
   Path,
   Polyline,
   Stop,
   LinearGradient as SvgLinearGradient,
+  Text as SvgText,
 } from "react-native-svg";
 
 // Define types for our data structure
@@ -142,69 +146,188 @@ const GaugeChart = ({ value, title }: { value: number; title: string }) => {
 };
 
 const TimeSeriesChart = ({ data }: { data: TimeSeriesDataPoint[] }) => {
+  const scrollViewRef = useRef<ScrollView>(null);
+  const screenWidth = Dimensions.get("window").width;
+
+  // Calculate total width based on number of data points
+  const pointSpacing = 60; // Spacing between data points
+  const chartPadding = 20; // Padding on each side
+  const totalWidth = Math.max(
+    screenWidth - 40,
+    (data.length - 1) * pointSpacing + chartPadding * 2
+  );
+
+  // SVG viewBox width will be max(screenWidth, data points * spacing)
+  const svgWidth = totalWidth;
+
   return (
     <View style={styles.chartContainer}>
-      <View style={styles.chartContent}>
-        <Svg width="100%" height="100%" viewBox="0 0 500 200">
-          {/* Background grid lines */}
-          <Path
-            d="M0,50 H500 M0,100 H500 M0,150 H500"
-            stroke="rgba(255, 255, 255, 0.1)"
-            strokeWidth="1"
-          />
-
-          {/* Line chart */}
-          <Polyline
-            points={data
-              .map((point, index) => {
-                const x = (index / (data.length - 1)) * 500;
-                // Normalize the value to be between 0-200 for y-coordinate (inverted because SVG y-axis is top to bottom)
-                const maxValue = Math.max(...data.map((item) => item.value));
-                const minValue = Math.min(...data.map((item) => item.value));
-                const range = maxValue - minValue;
-                // Add a 20% padding to the top and bottom
-                const normalizedValue =
-                  200 - (((point.value - minValue) / range) * 160 + 20);
-
-                return `${x},${normalizedValue}`;
-              })
-              .join(" ")}
-            fill="none"
-            stroke="#3563E9"
-            strokeWidth="3"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
-
-          {/* Data points */}
-          {data.map((point, index) => {
-            const x = (index / (data.length - 1)) * 500;
-            const maxValue = Math.max(...data.map((item) => item.value));
-            const minValue = Math.min(...data.map((item) => item.value));
-            const range = maxValue - minValue;
-            const normalizedValue =
-              200 - (((point.value - minValue) / range) * 160 + 20);
-
-            return (
-              <Circle
-                key={index}
-                cx={x}
-                cy={normalizedValue}
-                r="4"
-                fill="#3563E9"
-              />
-            );
-          })}
-        </Svg>
+      <View style={styles.chartLegend}>
+        <Text style={styles.chartLegendText}>Wave Intensity</Text>
       </View>
 
+      <ScrollView
+        ref={scrollViewRef}
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ width: totalWidth }}
+        style={styles.scrollableChart}
+        bounces={false}
+        scrollEventThrottle={16}
+      >
+        <View style={[styles.chartContent, { width: totalWidth }]}>
+          <Svg width="100%" height="100%" viewBox={`0 0 ${svgWidth} 200`}>
+            {/* Background grid lines */}
+            <Path
+              d={`M${chartPadding},50 H${
+                svgWidth - chartPadding
+              } M${chartPadding},100 H${
+                svgWidth - chartPadding
+              } M${chartPadding},150 H${svgWidth - chartPadding}`}
+              stroke="rgba(255, 255, 255, 0.1)"
+              strokeWidth="1"
+            />
+
+            {/* Vertical grid lines for each data point */}
+            {data.map((_, index) => {
+              const x = chartPadding + index * pointSpacing;
+              return (
+                <Line
+                  key={`grid-${index}`}
+                  x1={x}
+                  y1="20"
+                  x2={x}
+                  y2="160"
+                  stroke="rgba(255, 255, 255, 0.05)"
+                  strokeWidth="1"
+                />
+              );
+            })}
+
+            {/* Line chart */}
+            <Polyline
+              points={data
+                .map((point, index) => {
+                  const x = chartPadding + index * pointSpacing;
+                  // Normalize the value to be between 0-200 for y-coordinate (inverted because SVG y-axis is top to bottom)
+                  const maxValue = Math.max(...data.map((item) => item.value));
+                  const minValue = Math.min(...data.map((item) => item.value));
+                  const range = maxValue - minValue || 1; // Avoid division by zero
+                  // Add a 20% padding to the top and bottom
+                  const normalizedValue =
+                    160 - ((point.value - minValue) / range) * 120 + 20;
+
+                  return `${x},${normalizedValue}`;
+                })
+                .join(" ")}
+              fill="none"
+              stroke="#3563E9"
+              strokeWidth="3"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+
+            {/* Data points with values */}
+            {data.map((point, index) => {
+              const x = chartPadding + index * pointSpacing;
+              const maxValue = Math.max(...data.map((item) => item.value));
+              const minValue = Math.min(...data.map((item) => item.value));
+              const range = maxValue - minValue || 1; // Avoid division by zero
+              const normalizedValue =
+                160 - ((point.value - minValue) / range) * 120 + 20;
+
+              return (
+                <React.Fragment key={index}>
+                  {/* Data point circle */}
+                  <Circle cx={x} cy={normalizedValue} r="4" fill="#3563E9" />
+
+                  {/* Data value label */}
+                  <SvgText
+                    x={x}
+                    y={normalizedValue - 12}
+                    fontSize="10"
+                    fill="#FFFFFF"
+                    textAnchor="middle"
+                    fontWeight="bold"
+                  >
+                    {point.value}
+                  </SvgText>
+                </React.Fragment>
+              );
+            })}
+
+            {/* Y-axis labels */}
+            <SvgText
+              x="10"
+              y="50"
+              fontSize="10"
+              fill="rgba(255,255,255,0.7)"
+              textAnchor="start"
+            >
+              High
+            </SvgText>
+            <SvgText
+              x="10"
+              y="100"
+              fontSize="10"
+              fill="rgba(255,255,255,0.7)"
+              textAnchor="start"
+            >
+              Med
+            </SvgText>
+            <SvgText
+              x="10"
+              y="150"
+              fontSize="10"
+              fill="rgba(255,255,255,0.7)"
+              textAnchor="start"
+            >
+              Low
+            </SvgText>
+          </Svg>
+        </View>
+      </ScrollView>
+
       {/* X-axis labels */}
-      <View style={styles.xAxisLabels}>
-        {data.map((item, index) => (
-          <Text key={index} style={styles.barLabel}>
-            {item.time}
-          </Text>
-        ))}
+      <ScrollView
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ width: totalWidth }}
+        style={styles.scrollableXAxis}
+        scrollEnabled={false} // Disabled to sync with main chart
+        ref={(ref) => {
+          // Sync this ScrollView with the main one
+          if (ref && scrollViewRef.current) {
+            // @ts-ignore - scrollView has these properties
+            ref.scrollTo = scrollViewRef.current.scrollTo;
+          }
+        }}
+      >
+        <View style={[styles.xAxisLabels, { width: totalWidth }]}>
+          {data.map((item, index) => (
+            <View
+              key={index}
+              style={[
+                styles.xAxisLabelContainer,
+                {
+                  left: chartPadding + index * pointSpacing,
+                  width: pointSpacing,
+                  position: "absolute",
+                  transform: [{ translateX: -pointSpacing / 2 }],
+                },
+              ]}
+            >
+              <Text style={styles.barLabel}>{item.time}</Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+
+      {/* Scroll indicator dots */}
+      <View style={styles.scrollIndicator}>
+        <View style={styles.scrollIndicatorDot} />
+        <View style={styles.scrollIndicatorDot} />
+        <View style={styles.scrollIndicatorDot} />
       </View>
     </View>
   );
@@ -228,68 +351,85 @@ const RecommendationItem = ({
 export default function AnalyticsScreen() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isHistoricalData, setIsHistoricalData] = useState(false);
   const { testId } = useLocalSearchParams<{ testId: string }>();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
+  const fetchData = async (testIdParam?: string) => {
+    try {
+      setLoading(true);
 
-        // If we have a testId, fetch specific test data
-        if (testId) {
-          console.log("Loading test with ID:", testId);
-          // Get the test result from mock data
-          const testResult = getTestById(testId);
+      // If we have a testId parameter, fetch specific test data
+      if (testIdParam) {
+        console.log("Loading test with ID:", testIdParam);
+        // Get the test result from mock data
+        const testResult = getTestById(testIdParam);
 
-          if (testResult) {
-            // Transform the test result to match AnalyticsData format
-            const analyticsData: AnalyticsData = {
-              attentionScore: testResult.attentionScore,
-              cognitiveLoad: 100 - testResult.relaxationLevel, // Inverse of relaxation
-              mentalFatigue: testResult.mentalFatigue,
-              relaxationLevel: testResult.relaxationLevel,
-              confidence: 85, // Default confidence level
-              stateDistribution: {
-                focused: 45,
-                relaxed: 25,
-                neutral: 20,
-                distracted: 10,
-              },
-              recommendations: testResult.recommendations || [],
-              timeSeriesData: testResult.waveData
-                ? testResult.waveData.map((value, index) => ({
-                    time: `${index} min`,
-                    value,
-                  }))
-                : MOCK_DATA.timeSeriesData,
-            };
-            setData(analyticsData);
-          } else {
-            console.log("Test not found, using mock data");
-            setData(MOCK_DATA);
-          }
+        if (testResult) {
+          // Transform the test result to match AnalyticsData format
+          const analyticsData: AnalyticsData = {
+            attentionScore: testResult.attentionScore,
+            cognitiveLoad: 100 - testResult.relaxationLevel, // Inverse of relaxation
+            mentalFatigue: testResult.mentalFatigue,
+            relaxationLevel: testResult.relaxationLevel,
+            confidence: 85, // Default confidence level
+            stateDistribution: {
+              focused: 45,
+              relaxed: 25,
+              neutral: 20,
+              distracted: 10,
+            },
+            recommendations: testResult.recommendations || [],
+            timeSeriesData: testResult.waveData
+              ? testResult.waveData.map((value, index) => ({
+                  time: `${index} min`,
+                  value,
+                }))
+              : MOCK_DATA.timeSeriesData,
+          };
+          setData(analyticsData);
+          setIsHistoricalData(true);
         } else {
-          // Normal flow - fetch from API or use mock data for a new test
-          try {
-            const response = await axios.get(
-              "http://localhost:5000/api/analytics"
-            );
-            setData(response.data);
-          } catch (error) {
-            console.log("Error fetching data, using mock data instead:", error);
-            setData(MOCK_DATA);
-          }
+          console.log("Test not found, using mock data");
+          setData(MOCK_DATA);
+          setIsHistoricalData(false);
         }
-      } catch (error) {
-        console.log("General error, using mock data:", error);
-        setData(MOCK_DATA);
-      } finally {
-        setLoading(false);
+      } else {
+        // New analysis flow - fetch from API or use mock data for a new test
+        try {
+          const response = await axios.get(
+            "http://localhost:5000/api/analytics"
+          );
+          setData(response.data);
+          setIsHistoricalData(false);
+        } catch (error) {
+          console.log("Error fetching data, using mock data instead:", error);
+          setData(MOCK_DATA);
+          setIsHistoricalData(false);
+        }
       }
-    };
+    } catch (error) {
+      console.log("General error, using mock data:", error);
+      setData(MOCK_DATA);
+      setIsHistoricalData(false);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchData();
+  // Initial data fetch when component mounts
+  useEffect(() => {
+    fetchData(testId);
   }, [testId]);
+
+  const handleTakeNewAnalysis = () => {
+    // Clear any test ID from the route
+    if (testId) {
+      router.setParams({});
+    }
+
+    // Fetch new data (without testId)
+    fetchData();
+  };
 
   if (loading) {
     return (
@@ -308,15 +448,7 @@ export default function AnalyticsScreen() {
       <StatusBar style="light" />
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
-          {/* <View style={styles.headerLeft}>
-            <Image
-              source={require("../../assets/images/icon.png")}
-              style={styles.brainIcon}
-              contentFit="contain"
-            />
-            <Text style={styles.headerTitle}>NeurAi</Text>
-          </View> */}
-          <View style={styles.header}>
+          <View style={styles.headerLeft}>
             <BrainIcon size={32} color="#3563E9" filled={true} />
             <Text style={styles.headerTitle}>NeurAi</Text>
           </View>
@@ -329,7 +461,19 @@ export default function AnalyticsScreen() {
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>Your Live Data</Text>
+        {/* Section header with title and possibly a button */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>
+            {isHistoricalData ? "Historical Data" : "Your Live Data"}
+          </Text>
+
+          <TouchableOpacity
+            style={styles.newAnalysisButton}
+            onPress={handleTakeNewAnalysis}
+          >
+            <Text style={styles.newAnalysisButtonText}>Take New Analysis</Text>
+          </TouchableOpacity>
+        </View>
 
         {data && <TimeSeriesChart data={data.timeSeriesData} />}
 
@@ -348,7 +492,7 @@ export default function AnalyticsScreen() {
           )}
         </View>
 
-        <Text style={styles.sectionTitle}>Ai analysis</Text>
+        <Text style={styles.sectionTitle}>AI Analysis</Text>
 
         <View style={styles.analysisContainer}>
           <Text style={styles.analysisTitle}>Mental State</Text>
@@ -358,7 +502,11 @@ export default function AnalyticsScreen() {
             <Text style={styles.confidenceValue}>{data?.confidence ?? 0}%</Text>
           </View>
 
-          <Text style={styles.analysisText}>You seem to be focused</Text>
+          <Text style={styles.analysisText}>
+            {isHistoricalData
+              ? "This is an analysis from a previous session"
+              : "You seem to be focused"}
+          </Text>
 
           <View style={styles.progressBar}>
             <LinearGradient
@@ -472,6 +620,14 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    marginBottom: 8,
+    marginTop: 16,
+  },
   sectionTitle: {
     color: "#FFFFFF",
     fontSize: 18,
@@ -479,29 +635,75 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     paddingHorizontal: 20,
   },
+  newAnalysisButton: {
+    backgroundColor: "#3563E9",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  newAnalysisButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
+  },
   chartContainer: {
-    height: 200,
+    height: 260, // Increased height to accommodate time labels and legend
     marginHorizontal: 20,
     backgroundColor: "rgba(255, 255, 255, 0.05)",
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
   },
+  chartLegend: {
+    marginBottom: 8,
+  },
+  chartLegendText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  scrollableChart: {
+    flex: 1,
+    width: "100%",
+  },
   chartContent: {
     flex: 1,
-    position: "relative",
+    height: 180,
+  },
+  scrollableXAxis: {
+    height: 20,
+    width: "100%",
   },
   xAxisLabels: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
+    height: 20,
+    position: "relative",
+  },
+  xAxisLabelContainer: {
+    alignItems: "center",
   },
   barLabel: {
     color: "#FFFFFF",
-    fontSize: 12,
+    fontSize: 10,
     opacity: 0.7,
     textAlign: "center",
-    flex: 1,
+  },
+  scrollIndicator: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 8,
+  },
+  scrollIndicatorDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    marginHorizontal: 2,
   },
   metricsGrid: {
     flexDirection: "row",
