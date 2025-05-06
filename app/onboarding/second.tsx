@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
@@ -100,9 +99,9 @@ export default function SignupScreen() {
       const data = await response.json();
 
       if (response.ok) {
-        // Set onboarding as completed
-        await AsyncStorage.setItem("hasCompletedOnboarding", "true");
+        // Set signup as successful but don't mark onboarding as completed yet
         // Navigate to login screen after successful signup
+        setIsLoading(false);
         router.replace("/onboarding/third");
       } else {
         // Handle API error responses
@@ -120,12 +119,7 @@ export default function SignupScreen() {
       }
 
       // Simulate API call with mock data for successful flow
-      setTimeout(async () => {
-        // Set onboarding as completed even in mock mode
-        await AsyncStorage.setItem("hasCompletedOnboarding", "true").catch(
-          (err) =>
-            console.error("Error setting onboarding completion status:", err)
-        );
+      setTimeout(() => {
         setIsLoading(false);
         router.replace("/onboarding/third");
       }, 1500);
@@ -139,14 +133,13 @@ export default function SignupScreen() {
 
     try {
       // This would connect to Google Sign-In in a real implementation
-      // For demo purposes, we'll just set the onboarding as completed
-      await AsyncStorage.setItem("hasCompletedOnboarding", "true");
+      // For demo purposes, we'll just navigate to login screen
       setTimeout(() => {
         setIsLoading(false);
         router.replace("/onboarding/third");
       }, 1500);
     } catch (error) {
-      console.error("Error setting onboarding completion status:", error);
+      console.error("Error during Google sign-up:", error);
       setApiError("Google sign-in failed. Please try again.");
       setIsLoading(false);
     }

@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
@@ -79,10 +78,10 @@ export default function LoginScreen() {
       const data = await response.json();
 
       if (response.ok) {
-        // Set onboarding as completed
-        await AsyncStorage.setItem("hasCompletedOnboarding", "true");
-        // Handle successful login
-        router.replace("/(tabs)");
+        // Don't set onboarding as completed yet - that happens in the help-menu
+        // Navigate to help menu screen after successful login
+        setIsLoading(false);
+        router.replace("/onboarding/help-menu");
       } else {
         // Handle API error responses
         setApiError(
@@ -96,13 +95,9 @@ export default function LoginScreen() {
       // For demo - simulate login with test credentials
       // Use email: test@example.com and password: password123 for successful login
       if (email === "test@example.com" && password === "password123") {
-        setTimeout(async () => {
-          await AsyncStorage.setItem("hasCompletedOnboarding", "true").catch(
-            (err) =>
-              console.error("Error setting onboarding completion status:", err)
-          );
+        setTimeout(() => {
           setIsLoading(false);
-          router.replace("/(tabs)");
+          router.replace("/onboarding/help-menu");
         }, 1500);
       } else {
         // Simulate failed login
@@ -121,14 +116,13 @@ export default function LoginScreen() {
 
     try {
       // This would connect to Google Sign-In in a real implementation
-      // For demo purposes, we'll just set the onboarding as completed
-      await AsyncStorage.setItem("hasCompletedOnboarding", "true");
+      // For demo purposes, navigate to help menu
       setTimeout(() => {
         setIsLoading(false);
-        router.replace("/(tabs)");
+        router.replace("/onboarding/help-menu");
       }, 1500);
     } catch (error) {
-      console.error("Error setting onboarding completion status:", error);
+      console.error("Error during Google sign-in:", error);
       setApiError("Google login failed. Please try again.");
       setIsLoading(false);
     }
