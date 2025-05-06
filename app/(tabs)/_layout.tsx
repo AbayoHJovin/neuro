@@ -9,6 +9,7 @@ import HomeIcon from "@/assets/svg/HomeIcon";
 import ProfileIcon from "@/assets/svg/ProfileIcon";
 import { HapticTab } from "@/components/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
+import BrainIcon from "@/components/BrainIcon";
 
 export default function TabLayout() {
   return (
@@ -47,7 +48,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, focused }) => (
-            <HomeIcon color={color} filled={focused} />
+            <BrainIcon color={color} filled={focused} />
           ),
           tabBarLabel: ({ color, focused }) => (
             <Text

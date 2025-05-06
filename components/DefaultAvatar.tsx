@@ -13,18 +13,24 @@ const DefaultAvatar: React.FC<DefaultAvatarProps> = ({ size = 50, style }) => (
       width: size,
       height: size,
       borderRadius: size / 2,
+      justifyContent: "center",
+      alignItems: "center",
       overflow: "hidden",
       backgroundColor: "#1D1D41",
       ...style,
     }}
   >
-    <Svg width="100%" height="100%" viewBox="0 0 50 50" fill="none">
-      <Circle cx={25} cy={25} r={25} fill="#1D1D41" />
-      <Circle cx={25} cy={18} r={8} fill="#6D7FFF" />
+    <Svg
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+    >
       <Path
-        d="M10 42C10 34.268 16.268 28 24 28H26C33.732 28 40 34.268 40 42V45H10V42Z"
-        fill="#6D7FFF"
-      />
+        fill="#3052bd"
+        d="M12 4a4 4 0 0 1 4 4a4 4 0 0 1-4 4a4 4 0 0 1-4-4a4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"
+        strokeWidth={1.7}
+        stroke="#3052bd"
+      ></Path>
     </Svg>
   </View>
 );

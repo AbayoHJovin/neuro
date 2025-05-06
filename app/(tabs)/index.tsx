@@ -7,7 +7,8 @@ import {
   View, 
   RefreshControl,
   ActivityIndicator,
-  Alert
+  Alert,
+  Image
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import DefaultAvatar from "@/components/DefaultAvatar";
@@ -69,10 +70,11 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <BrainIcon size={32} color="#3563E9" />
+            <BrainIcon size={32} color="#3563E9" filled={true}/>
             <Text style={styles.logoText}>NeurAi</Text>
           </View>
           <DefaultAvatar />
+          {/* <Image source={require("@/assets/images/userAvatar.png")} width={20} height={20}/> */}
         </View>
 
         {/* Welcome */}
