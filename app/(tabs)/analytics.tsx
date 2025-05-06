@@ -1,3 +1,4 @@
+import BrainIcon from "@/components/BrainIcon";
 import axios from "axios";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -124,7 +125,7 @@ const GaugeChart = ({ value, title }: { value: number; title: string }) => {
           />
 
           {/* Center point for needle */}
-          <Circle cx="100" cy="100" r="6" fill="#FFFFFF" />
+          <Circle cx="100" cy="100" r="6.8" fill="#FFFFFF" />
         </Svg>
 
         {/* Needle */}
@@ -260,12 +261,16 @@ export default function AnalyticsScreen() {
       <StatusBar style="light" />
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
-          <View style={styles.headerLeft}>
+          {/* <View style={styles.headerLeft}>
             <Image
               source={require("../../assets/images/icon.png")}
               style={styles.brainIcon}
               contentFit="contain"
             />
+            <Text style={styles.headerTitle}>NeurAi</Text>
+          </View> */}
+           <View style={styles.header}>
+            <BrainIcon size={32} color="#3563E9" filled={true}/>
             <Text style={styles.headerTitle}>NeurAi</Text>
           </View>
           <View style={styles.profileIconContainer}>
@@ -408,6 +413,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 18,
     fontWeight: "bold",
+    marginLeft:8,
   },
   profileIconContainer: {
     width: 36,
@@ -463,7 +469,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderColor:"#3563E9",
+    borderWidth:1,
+    // backgroundColor: "rgba(255, 255, 255, 0.05)",
     borderRadius: 16,
     padding: 16,
   },
