@@ -12,6 +12,7 @@ import "react-native-reanimated";
 import "../global.css";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
+import CustomSplashScreen from "@/screens/Splash/SplashScreen";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -27,25 +28,30 @@ export default function RootLayout() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
   const [splashReady, setSplashReady] = useState(false);
+  const [showCustomSplash, setShowCustomSplash] = useState(true);
 
   useEffect(() => {
     if (loaded) {
-      // Artificial delay to keep the splash screen visible for a bit
-      const splashTimer = setTimeout(() => {
-        setSplashReady(true);
-        // Hide the splash screen after the delay
-        SplashScreen.hideAsync().catch(() => {
-          /* reloading the app might trigger some race conditions, ignore them */
-        });
-      }, 3000); // 3 seconds delay
-
-      return () => clearTimeout(splashTimer);
+      // Hide the native splash screen
+      SplashScreen.hideAsync().catch(() => {
+        /* reloading the app might trigger some race conditions, ignore them */
+      });
+      setSplashReady(true);
     }
   }, [loaded]);
 
-  // If fonts are not loaded or we're still showing splash, keep splash screen visible
+  const handleSplashComplete = () => {
+    setShowCustomSplash(false);
+  };
+
+  // If fonts are not loaded, keep native splash screen visible
   if (!loaded || !splashReady) {
     return null;
+  }
+
+  // If fonts are loaded but we're still showing custom splash, render it
+  if (showCustomSplash) {
+    return <CustomSplashScreen onAnimationComplete={handleSplashComplete} />;
   }
 
   return (
