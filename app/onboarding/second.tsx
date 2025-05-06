@@ -167,15 +167,16 @@ export default function SignupScreen() {
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
+          className="p-4"
         >
           {/* Star icon */}
-          <View className="mt-10 ml-8">
+          <View className="mt-8 ml-4">
             <Stars />
           </View>
 
           {/* Header text */}
-          <View className="mt-6 px-8">
-            <Text className="text-white text-center text-3xl font-bold mb-2">
+          <View className="mt-8 mb-8">
+            <Text className="text-white text-center text-3xl font-bold mb-3">
               Welcome To NeuroLab
             </Text>
             <Text className="text-white text-center text-lg opacity-80">
@@ -185,16 +186,16 @@ export default function SignupScreen() {
 
           {/* API Error Message */}
           {apiError ? (
-            <View className="mt-4 mx-8 bg-red-900/30 border border-red-500 rounded-lg p-3">
+            <View className="mb-6 mx-4 bg-red-900/30 border border-red-500 rounded-lg p-3">
               <Text className="text-red-500 text-center">{apiError}</Text>
             </View>
           ) : null}
 
           {/* Form fields */}
-          <View className="mt-6 px-8 w-full">
+          <View className="mb-6 px-4 w-full">
+            <Text className="text-white text-base mb-2">Full Names</Text>
             <InputField
-              label="Full Names"
-              placeholder="Enter your full name"
+              label=""
               value={fullName}
               onChangeText={(text) => {
                 setFullName(text);
@@ -203,11 +204,14 @@ export default function SignupScreen() {
                 }
               }}
               error={errors.fullName}
+              containerStyle="mb-6"
+              inputStyle="bg-[#2C2C4A]"
+              placeholder=""
             />
 
+            <Text className="text-white text-base mb-2">Email</Text>
             <InputField
-              label="Email"
-              placeholder="Enter your email"
+              label=""
               value={email}
               onChangeText={(text) => {
                 setEmail(text);
@@ -218,11 +222,14 @@ export default function SignupScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               error={errors.email}
+              containerStyle="mb-6"
+              inputStyle="bg-[#2C2C4A]"
+              placeholder=""
             />
 
+            <Text className="text-white text-base mb-2">Password</Text>
             <InputField
-              label="Password"
-              placeholder="Enter your password"
+              label=""
               value={password}
               onChangeText={(text) => {
                 setPassword(text);
@@ -233,19 +240,24 @@ export default function SignupScreen() {
               secureTextEntry
               showPasswordToggle
               error={errors.password}
-              containerStyle="mb-2"
+              containerStyle="mb-6"
+              inputStyle="bg-[#2C2C4A]"
+              placeholder=""
             />
 
-            <Button
-              title="Sign Up"
-              onPress={handleSignUp}
-              isLoading={isLoading}
-              disabled={isLoading}
-            />
+            <View className="mt-4 mb-4 items-center">
+              <Button
+                title="Sign Up"
+                onPress={handleSignUp}
+                isLoading={isLoading}
+                disabled={isLoading}
+                fullWidth={true}
+              />
+            </View>
           </View>
 
           {/* Form requirements info */}
-          <View className="mt-4 px-8">
+          <View className="mb-6 px-4">
             <Text className="text-gray-400 text-xs">
               • Password must be at least 6 characters
             </Text>
@@ -255,7 +267,7 @@ export default function SignupScreen() {
           </View>
 
           {/* Or sign in section */}
-          <View className="mt-6 px-8">
+          <View className="mb-6 px-4">
             <View className="flex-row items-center justify-center">
               <View className="h-[1px] bg-white opacity-20 flex-1" />
               <Text className="text-white mx-4">Or Sign In</Text>
@@ -264,12 +276,12 @@ export default function SignupScreen() {
           </View>
 
           {/* Google sign in button */}
-          <View className="mt-6 px-8">
+          <View className="mb-8 px-4 items-center">
             <GoogleSignInButton onPress={handleGoogleSignUp} />
           </View>
 
           {/* Already have account section */}
-          <View className="mt-8 mb-6 items-center justify-center flex-row">
+          <View className="mb-8 items-center justify-center flex-row">
             <Text className="text-white">Already have an account? </Text>
             <Pressable
               onPress={goToLogin}

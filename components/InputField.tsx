@@ -10,6 +10,7 @@ interface InputFieldProps extends TextInputProps {
   secureTextEntry?: boolean;
   containerStyle?: string;
   showPasswordToggle?: boolean;
+  inputStyle?: string;
 }
 
 export default function InputField({
@@ -20,6 +21,7 @@ export default function InputField({
   secureTextEntry = false,
   containerStyle = "mb-6",
   showPasswordToggle = false,
+  inputStyle = "bg-[#242350]",
   ...props
 }: InputFieldProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -33,12 +35,12 @@ export default function InputField({
       <Text className="text-white mb-2">{label}</Text>
       <View className="relative">
         <View
-          className={`bg-[#242350] rounded-lg flex-row items-center ${
+          className={`rounded-xl flex-row items-center ${inputStyle} ${
             error ? "border border-red-500" : ""
           }`}
         >
           <TextInput
-            className={`text-white h-14 rounded-lg px-4 flex-1 ${
+            className={`text-white h-14 rounded-xl px-4 flex-1 ${
               showPasswordToggle ? "pr-10" : ""
             }`}
             placeholderTextColor="#6b6b6b"

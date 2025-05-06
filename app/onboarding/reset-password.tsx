@@ -5,11 +5,11 @@ import {
   Animated,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   SafeAreaView,
   ScrollView,
   Text,
   View,
-  Pressable,
 } from "react-native";
 
 import Stars from "@/assets/svg/Stars";
@@ -105,15 +105,16 @@ export default function ResetPasswordScreen() {
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
+          className="p-4"
         >
           {/* Star icon */}
-          <View className="mt-10 ml-8">
+          <View className="mt-8 ml-4">
             <Stars />
           </View>
 
           {/* Header text */}
-          <View className="mt-6 px-8">
-            <Text className="text-white text-center text-3xl font-bold mb-2">
+          <View className="mt-8 mb-8">
+            <Text className="text-white text-center text-3xl font-bold mb-3">
               Welcome To NeuroLab
             </Text>
             <Text className="text-white text-center text-lg opacity-80">
@@ -123,7 +124,7 @@ export default function ResetPasswordScreen() {
 
           {/* API Error Message */}
           {apiError ? (
-            <View className="mt-4 mx-8 bg-red-900/30 border border-red-500 rounded-lg p-3">
+            <View className="mb-6 mx-4 bg-red-900/30 border border-red-500 rounded-lg p-3">
               <Text className="text-red-500 text-center">{apiError}</Text>
             </View>
           ) : null}
@@ -131,16 +132,16 @@ export default function ResetPasswordScreen() {
           {isSuccess ? (
             // Success message with fade-in animation
             <Animated.View
-              className="flex-1 px-8 items-center justify-center"
+              className="flex-1 px-4 items-center justify-center"
               style={{ opacity: fadeAnim }}
             >
               <Text className="text-white text-center text-lg mb-6">
                 A password reset link has been sent to your email. Please check
                 your inbox and follow the instructions to reset your password.
               </Text>
-              <View className="w-full px-4">
-                <Button 
-                  title="Return to Login" 
+              <View className="w-full items-center">
+                <Button
+                  title="Return to Login"
                   onPress={handleReturnToLogin}
                   fullWidth={true}
                 />
@@ -148,8 +149,8 @@ export default function ResetPasswordScreen() {
             </Animated.View>
           ) : (
             // Reset password form
-            <View className="mt-8 px-8 w-full">
-              <Text className="text-white text-base mb-3">
+            <View className="mb-6 px-4 w-full">
+              <Text className="text-white text-base mb-2">
                 Enter your Email
               </Text>
               <InputField
@@ -161,14 +162,15 @@ export default function ResetPasswordScreen() {
                     setError("");
                   }
                 }}
-                placeholder="Enter your email"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 error={error}
-                containerStyle="mb-10"
+                containerStyle="mb-8"
+                inputStyle="bg-[#2C2C4A]"
+                placeholder=""
               />
 
-              <View className="items-center w-full px-4">
+              <View className="items-center">
                 <Button
                   title="Change Password"
                   onPress={handleChangePassword}
@@ -177,15 +179,17 @@ export default function ResetPasswordScreen() {
                   fullWidth={true}
                 />
               </View>
-              
+
               {/* Return to login link */}
-              <View className="mt-8 mb-6 items-center justify-center">
-                <Pressable 
-                  onPress={handleReturnToLogin} 
+              <View className="mt-8 items-center justify-center">
+                <Pressable
+                  onPress={handleReturnToLogin}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   className="py-2 px-4"
                 >
-                  <Text className="text-[#3D5AF1] text-base font-medium">Return to Login</Text>
+                  <Text className="text-[#3D5AF1] text-base font-medium">
+                    Return to Login
+                  </Text>
                 </Pressable>
               </View>
             </View>
@@ -195,4 +199,3 @@ export default function ResetPasswordScreen() {
     </SafeAreaView>
   );
 }
- 
