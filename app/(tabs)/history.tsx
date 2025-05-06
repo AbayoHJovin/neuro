@@ -5,9 +5,37 @@ import React, { useEffect, useState } from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import BrainIcon from "@/components/BrainIcon";
+import DateSelector from "@/components/DateSelector";
 import TestCard from "@/components/History/TestCard";
 import SearchBar from "@/components/SearchBar";
 import { getAllTests, TestResult } from "@/utils/mockData";
+
+// Helper to check if dates are on the same day
+function isSameDay(d1: Date, d2: Date): boolean {
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  );
+}
+
+// Helper to format timestamps to date objects - expects formats like "5:20 PM"
+function parseTimeToDate(timeString: string, referenceDate?: Date): Date {
+  const date = referenceDate ? new Date(referenceDate) : new Date();
+
+  // Parse hours and minutes from the time string
+  const isPM = timeString.includes("PM");
+  const timeParts = timeString.replace(/ (AM|PM)/, "").split(":");
+  let hours = parseInt(timeParts[0], 10);
+  const minutes = parseInt(timeParts[1], 10);
+
+  // Convert to 24-hour format if needed
+  if (isPM && hours < 12) hours += 12;
+  if (!isPM && hours === 12) hours = 0;
+
+  date.setHours(hours, minutes, 0, 0);
+  return date;
+}
 
 // Group test results by date
 type GroupedTests = {
@@ -19,6 +47,7 @@ export default function HistoryScreen() {
   const [tests, setTests] = useState<TestResult[]>([]);
   const [filteredTests, setFilteredTests] = useState<TestResult[]>([]);
   const [groupedTests, setGroupedTests] = useState<GroupedTests>({});
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   useEffect(() => {
     // Simulate API call to fetch data
@@ -26,29 +55,15 @@ export default function HistoryScreen() {
       try {
         // In a real app, this would be an API call
         const data = getAllTests();
-        setTests(data);
-        setFilteredTests(data);
 
-        // Group tests by time (for this demo we'll just use simple groups)
-        const today: TestResult[] = [];
-        const yesterday: TestResult[] = [];
+        // Enrich data with actual Date objects
+        const enrichedData = data.map((test) => ({
+          ...test,
+          dateObject: parseTimeToDate(test.timestamp),
+        }));
 
-        // In a real app, we would parse actual dates
-        // For demo purposes, we'll split them by timestamp
-        data.forEach((test) => {
-          const hour = parseInt(test.timestamp.split(":")[0]);
-          if (hour >= 12) {
-            today.push(test);
-          } else {
-            yesterday.push(test);
-          }
-        });
-
-        const grouped: GroupedTests = {};
-        if (today.length > 0) grouped["Today"] = today;
-        if (yesterday.length > 0) grouped["Yesterday"] = yesterday;
-
-        setGroupedTests(grouped);
+        setTests(enrichedData);
+        applyFilters(enrichedData, searchQuery, selectedDate);
       } catch (error) {
         console.error("Error fetching test history:", error);
       }
@@ -57,44 +72,47 @@ export default function HistoryScreen() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setFilteredTests(tests);
-
-      // Regroup tests when search is cleared
-      const today: TestResult[] = [];
-      const yesterday: TestResult[] = [];
-
-      tests.forEach((test) => {
-        const hour = parseInt(test.timestamp.split(":")[0]);
-        if (hour >= 12) {
-          today.push(test);
-        } else {
-          yesterday.push(test);
-        }
-      });
-
-      const grouped: GroupedTests = {};
-      if (today.length > 0) grouped["Today"] = today;
-      if (yesterday.length > 0) grouped["Yesterday"] = yesterday;
-
-      setGroupedTests(grouped);
-    } else {
-      const query = searchQuery.toLowerCase();
-      const filtered = tests.filter(
+  // Filter and group tests based on search query and selected date
+  const applyFilters = (
+    testData: (TestResult & { dateObject?: Date })[],
+    query: string,
+    date: Date
+  ) => {
+    // First filter by search query if present
+    let filtered = testData;
+    if (query.trim() !== "") {
+      const lowercaseQuery = query.toLowerCase();
+      filtered = testData.filter(
         (test) =>
-          test.label.toLowerCase().includes(query) ||
-          test.description.toLowerCase().includes(query)
+          test.label.toLowerCase().includes(lowercaseQuery) ||
+          test.description.toLowerCase().includes(lowercaseQuery)
       );
-      setFilteredTests(filtered);
-
-      // When searching, put all results in one group
-      setGroupedTests({ Results: filtered });
     }
-  }, [searchQuery, tests]);
+
+    // Then filter by selected date
+    filtered = filtered.filter(
+      (test) => test.dateObject && isSameDay(test.dateObject, date)
+    );
+
+    setFilteredTests(filtered);
+
+    // Group by date (in a real app with multiple dates)
+    const grouped: GroupedTests = {};
+    const dateStr = date.toLocaleDateString();
+    grouped[dateStr] = filtered;
+    setGroupedTests(grouped);
+  };
+
+  useEffect(() => {
+    applyFilters(tests, searchQuery, selectedDate);
+  }, [searchQuery, selectedDate, tests]);
 
   const clearSearch = () => {
     setSearchQuery("");
+  };
+
+  const handleDateChange = (date: Date) => {
+    setSelectedDate(date);
   };
 
   return (
@@ -117,7 +135,13 @@ export default function HistoryScreen() {
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>Session History</Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.sectionTitle}>Session History</Text>
+          <DateSelector
+            onDateChange={handleDateChange}
+            selectedDate={selectedDate}
+          />
+        </View>
 
         <View style={styles.searchContainer}>
           <SearchBar
@@ -133,7 +157,13 @@ export default function HistoryScreen() {
             {Object.keys(groupedTests).map((dateGroup) => (
               <View key={dateGroup}>
                 <View style={styles.dateHeaderContainer}>
-                  <Text style={styles.dateHeader}>{dateGroup}</Text>
+                  <Text style={styles.dateHeader}>
+                    {new Date(dateGroup).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </Text>
                 </View>
 
                 {groupedTests[dateGroup].map((test) => (
@@ -155,8 +185,12 @@ export default function HistoryScreen() {
             </View>
             <Text style={styles.emptyTitle}>No Sessions Found</Text>
             <Text style={styles.emptySubtitle}>
-              Your session history will appear here after you complete your
-              first brain analysis
+              No brain analysis sessions found for{" "}
+              {selectedDate.toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
             </Text>
           </View>
         )}
@@ -202,11 +236,16 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  titleRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
   sectionTitle: {
     color: "#FFFFFF",
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 16,
   },
   searchContainer: {
     marginBottom: 24,
