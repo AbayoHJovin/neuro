@@ -3,7 +3,9 @@ import {
   ActivityIndicator,
   Pressable,
   PressableProps,
+  StyleSheet,
   Text,
+  View,
 } from "react-native";
 
 interface ButtonProps extends PressableProps {
@@ -25,12 +27,11 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const getButtonStyle = () => {
-    const baseStyle = fullWidth 
-      ? "rounded-lg items-center justify-center h-14 px-8 w-full" 
-      : "rounded-lg items-center justify-center h-14 px-8";
-      
-    if (disabled)
-      return `bg-[#8c7e24] ${baseStyle}`;
+    const baseStyle = fullWidth
+      ? "items-center justify-center w-full"
+      : "items-center justify-center";
+
+    if (disabled) return `bg-[#8c7e24] ${baseStyle}`;
 
     switch (variant) {
       case "primary":
@@ -54,17 +55,43 @@ export default function Button({
   };
 
   return (
-    <Pressable
-      onPress={onPress}
-      disabled={isLoading || disabled}
-      className={getButtonStyle()}
-      {...props}
-    >
-      {isLoading ? (
-        <ActivityIndicator color="white" />
-      ) : (
-        <Text className={getTextStyle()}>{title}</Text>
-      )}
-    </Pressable>
+    <View className={fullWidth ? "w-full items-center" : "items-center"}>
+      <Pressable
+        onPress={onPress}
+        disabled={isLoading || disabled}
+        className={getButtonStyle()}
+        style={[
+          styles.button,
+          fullWidth ? styles.fullWidthButton : styles.regularButton,
+        ]}
+        {...props}
+      >
+        {isLoading ? (
+          <ActivityIndicator color="white" />
+        ) : (
+          <Text className={getTextStyle()} style={styles.buttonText}>
+            {title}
+          </Text>
+        )}
+      </Pressable>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    height: 56,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 28,
+  },
+  fullWidthButton: {
+    width: "80%",
+  },
+  regularButton: {
+    minWidth: 200,
+  },
+  buttonText: {
+    lineHeight: 24,
+  },
+});
