@@ -1,58 +1,124 @@
-import HomeIcon from "@/assets/svg/HomeIcon";
-import DefaultAvatar from "@/components/DefaultAvatar";
-import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { 
+  SafeAreaView, 
+  ScrollView, 
+  StyleSheet, 
+  Text, 
+  View, 
+  RefreshControl,
+  ActivityIndicator,
+  Alert
+} from "react-native";
+import { StatusBar } from "expo-status-bar";
+import DefaultAvatar from "@/components/DefaultAvatar";
+import LineChart from "@/components/charts/LineChart";
+import BrainIcon from "@/components/BrainIcon";
+import StatsSummary from "@/components/StatsSummary";
+import MentalStateIndicator from "@/components/MentalStateIndicator";
+import RecommendationCard from "@/components/RecommendationCard";
+import useBrainData from "@/hooks/useBrainData";
 
 export default function HomeScreen() {
+  const { 
+    loading, 
+    refreshing, 
+    homeData, 
+    liveData, 
+    error, 
+    onRefresh 
+  } = useBrainData();
+
+  // Extract data for the chart
+  const chartData = liveData.map(item => item.value);
+  const chartLabels = Array.from({ length: 6 }, (_, i) => `${i} min`);
+
+  // Show error if any
+  React.useEffect(() => {
+    if (error) {
+      Alert.alert("Error", error);
+    }
+  }, [error]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="light" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#3563E9" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh}
+            tintColor="#3563E9"
+            colors={["#3563E9"]}
+          />
+        }
+      >
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.welcomeContainer}>
-            <Text style={styles.welcomeText}>Welcome back</Text>
-            <Text style={styles.usernameText}>User</Text>
+          <View style={styles.logoContainer}>
+            <BrainIcon size={32} color="#3563E9" />
+            <Text style={styles.logoText}>NeurAi</Text>
           </View>
           <DefaultAvatar />
         </View>
 
-        {/* Main Content */}
-        <View style={styles.mainContent}>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoCardTitle}>Brain Activity</Text>
-            <Text style={styles.infoCardValue}>78%</Text>
-            <Text style={styles.infoCardSubtitle}>
-              Last session: 2 hours ago
-            </Text>
-          </View>
+        {/* Welcome */}
+        <Text style={styles.welcomeText}>Welcome Back</Text>
 
-          <View style={styles.recentSessionsContainer}>
-            <Text style={styles.sectionTitle}>Recent Sessions</Text>
-            <View style={styles.sessionCard}>
-              <View style={styles.sessionIconContainer}>
-                <HomeIcon color="#3563E9" filled />
-              </View>
-              <View style={styles.sessionInfo}>
-                <Text style={styles.sessionTitle}>Meditation Session</Text>
-                <Text style={styles.sessionDuration}>Duration: 25 minutes</Text>
-              </View>
-              <Text style={styles.sessionTime}>Today</Text>
-            </View>
+        {/* Stats Summary */}
+        <StatsSummary 
+          stats={[
+            { title: 'Total Analyses', value: homeData?.analyses.total || 0 },
+            { title: 'Total Reports', value: homeData?.reports.total || 0 },
+          ]}
+        />
 
-            <View style={styles.sessionCard}>
-              <View style={styles.sessionIconContainer}>
-                <HomeIcon color="#3563E9" filled />
-              </View>
-              <View style={styles.sessionInfo}>
-                <Text style={styles.sessionTitle}>Focus Training</Text>
-                <Text style={styles.sessionDuration}>Duration: 15 minutes</Text>
-              </View>
-              <Text style={styles.sessionTime}>Yesterday</Text>
-            </View>
+        {/* Live Data Chart */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Your Live Data</Text>
+          <View style={styles.chartContainer}>
+            <LineChart 
+              data={chartData}
+              height={200}
+              showDots={true}
+              showGrid={true}
+              labels={chartLabels}
+              lineColor="#3563E9"
+            />
           </View>
+        </View>
+
+        {/* Mental State */}
+        <MentalStateIndicator 
+          state={homeData?.mentalState.state || "Neutral"}
+          percentage={homeData?.mentalState.percentage || 0}
+          message={homeData?.mentalState.message}
+        />
+
+        {/* AI Recommendations */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Recent Ai Recommendations</Text>
+          
+          {homeData?.recommendations.map((recommendation) => (
+            <RecommendationCard 
+              key={recommendation.id}
+              recommendation={recommendation}
+              onPress={() => console.log(`View recommendation: ${recommendation.title}`)}
+            />
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -64,6 +130,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#050628",
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   scrollContent: {
     flexGrow: 1,
     padding: 20,
@@ -72,88 +143,39 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 20,
-    marginBottom: 30,
+    marginTop: 10,
+    marginBottom: 24,
   },
-  welcomeContainer: {
-    flex: 1,
-  },
-  welcomeText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    opacity: 0.8,
-  },
-  usernameText: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  mainContent: {
-    flex: 1,
-  },
-  infoCard: {
-    backgroundColor: "#1D1D41",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 30,
-  },
-  infoCardTitle: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  infoCardValue: {
-    color: "#3563E9",
-    fontSize: 36,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  infoCardSubtitle: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    opacity: 0.6,
-  },
-  recentSessionsContainer: {
-    flex: 1,
-  },
-  sectionTitle: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-  },
-  sessionCard: {
-    backgroundColor: "#1D1D41",
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 10,
+  logoContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
-  sessionIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(53, 99, 233, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 15,
-  },
-  sessionInfo: {
-    flex: 1,
-  },
-  sessionTitle: {
+  logoText: {
     color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "500",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginLeft: 8,
   },
-  sessionDuration: {
+  welcomeText: {
     color: "#FFFFFF",
-    fontSize: 14,
-    opacity: 0.6,
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 24,
+    textAlign: "center",
   },
-  sessionTime: {
-    color: "#3563E9",
-    fontSize: 14,
+  sectionContainer: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    color: "#FFFFFF",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  chartContainer: {
+    backgroundColor: "#1D1D41",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 8,
   },
 });
