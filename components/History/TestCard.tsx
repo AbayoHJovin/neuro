@@ -33,20 +33,8 @@ const TestCard = ({
 
   // Choose gradient colors based on mental state
   const getGradientColors = () => {
-    switch (label) {
-      case "Focused":
-        return ["#242a70", "#091052"] as const; // Blue gradient
-      case "Relaxed":
-        return ["#145214", "#1c7947"] as const; // Green gradient
-      case "Distracted":
-        return ["#5c2323", "#8a3030"] as const; // Red gradient
-      case "Flow State":
-        return ["#4a3268", "#7b4dbd"] as const; // Purple gradient
-      case "Meditative":
-        return ["#1d6a8c", "#2a95c4"] as const; // Teal gradient
-      default:
-        return ["#242a70", "#091052"] as const; // Default blue gradient
-    }
+    return ["#242a70", "#091052"] as const; // Blue gradient
+
   };
 
   // Choose label color based on mental state

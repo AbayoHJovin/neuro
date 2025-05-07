@@ -2,7 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import BrainIcon from "@/components/BrainIcon";
 import DateSelector from "@/components/DateSelector";
@@ -48,6 +55,7 @@ export default function HistoryScreen() {
   const [filteredTests, setFilteredTests] = useState<TestResult[]>([]);
   const [groupedTests, setGroupedTests] = useState<GroupedTests>({});
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [isFiltered, setIsFiltered] = useState(false);
 
   useEffect(() => {
     // Simulate API call to fetch data
@@ -111,8 +119,29 @@ export default function HistoryScreen() {
     setSearchQuery("");
   };
 
+  const resetFilters = () => {
+    setSelectedDate(new Date());
+    setSearchQuery("");
+    setIsFiltered(false);
+    setFilteredTests(tests);
+
+    // Regroup all tests
+    const grouped: GroupedTests = {};
+    tests.forEach((test) => {
+      const dateStr =
+        test.dateObject?.toLocaleDateString() ||
+        new Date().toLocaleDateString();
+      if (!grouped[dateStr]) {
+        grouped[dateStr] = [];
+      }
+      grouped[dateStr].push(test);
+    });
+    setGroupedTests(grouped);
+  };
+
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
+    setIsFiltered(true);
   };
 
   return (
@@ -185,13 +214,25 @@ export default function HistoryScreen() {
             </View>
             <Text style={styles.emptyTitle}>No Sessions Found</Text>
             <Text style={styles.emptySubtitle}>
-              No brain analysis sessions found for{" "}
-              {selectedDate.toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
+              {isFiltered
+                ? `No brain analysis sessions found for ${selectedDate.toLocaleDateString(
+                    "en-US",
+                    {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    }
+                  )}`
+                : "No brain analysis sessions available"}
             </Text>
+            {isFiltered && (
+              <TouchableOpacity
+                style={styles.resetButton}
+                onPress={resetFilters}
+              >
+                <Text style={styles.resetButtonText}>Reset Filters</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </ScrollView>
@@ -286,5 +327,17 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     textAlign: "center",
     maxWidth: "80%",
+  },
+  resetButton: {
+    backgroundColor: "#3563E9",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  resetButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
