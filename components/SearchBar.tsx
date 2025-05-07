@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { TextInput, TouchableOpacity, View } from "react-native";
 
 type SearchBarProps = {
   placeholder?: string;
@@ -16,55 +16,29 @@ const SearchBar = ({
   onClear,
 }: SearchBarProps) => {
   return (
-    <View style={styles.container}>
-      <View style={styles.searchIconContainer}>
-        <Ionicons name="search" size={20} color="#8E8E93" />
+    <View className="h-11 rounded-lg bg-[rgba(142,142,147,0.08)] flex-row items-center px-2 border border-[#1D4FD7]">
+      <View className="px-1.5 ">
+        <Ionicons name="search" size={20} color="#1D4FD7" />
       </View>
       <TextInput
-        style={styles.input}
+        className="flex-1 text-white text-base py-2"
         placeholder={placeholder}
         placeholderTextColor="#8E8E93"
         value={value}
         onChangeText={onChangeText}
       />
       {value.length > 0 && (
-        <TouchableOpacity style={styles.clearButton} onPress={onClear}>
+        <TouchableOpacity className="p-1.5" onPress={onClear}>
           <Ionicons name="close-circle" size={18} color="#8E8E93" />
         </TouchableOpacity>
       )}
       {value.length > 0 && (
-        <TouchableOpacity style={styles.micButton}>
+        <TouchableOpacity className="p-1.5">
           <Ionicons name="mic" size={20} color="#3563E9" />
         </TouchableOpacity>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    height: 44,
-    borderRadius: 10,
-    backgroundColor: "rgba(142, 142, 147, 0.08)",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 8,
-  },
-  searchIconContainer: {
-    paddingHorizontal: 6,
-  },
-  input: {
-    flex: 1,
-    color: "#FFFFFF",
-    fontSize: 16,
-    paddingVertical: 8,
-  },
-  clearButton: {
-    padding: 6,
-  },
-  micButton: {
-    padding: 6,
-  },
-});
 
 export default SearchBar;
