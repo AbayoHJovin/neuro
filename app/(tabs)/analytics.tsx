@@ -11,7 +11,6 @@ import {
   Dimensions,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -101,10 +100,12 @@ const GaugeChart = ({ value, title }: { value: number; title: string }) => {
   });
 
   return (
-    <View style={styles.gaugeContainer}>
-      <Text style={styles.gaugeTitle}>{title}</Text>
+    <View className="w-[48%] aspect-square items-center justify-center mb-5 border border-[#3563E9] rounded-2xl p-4">
+      <Text className="text-white text-base font-bold mb-4 text-center">
+        {title}
+      </Text>
 
-      <View style={styles.gaugeOuter}>
+      <View className="w-full h-[100px] justify-center items-center relative my-2">
         <Svg width="100%" height="100%" viewBox="0 0 200 100">
           {/* Semicircle background */}
           <Path
@@ -135,12 +136,39 @@ const GaugeChart = ({ value, title }: { value: number; title: string }) => {
         </Svg>
 
         {/* Needle */}
-        <Animated.View style={[styles.needle, needleStyle]}>
-          <View style={styles.needleTriangle} />
+        <Animated.View
+          style={[
+            {
+              position: "absolute",
+              bottom: 6,
+              left: "50%",
+              height: "50%",
+              width: 12,
+              alignItems: "center",
+              justifyContent: "flex-end",
+              transformOrigin: "center bottom",
+              zIndex: 10,
+            },
+            needleStyle,
+          ]}
+        >
+          <View
+            style={{
+              width: 0,
+              height: 0,
+              borderLeftWidth: 4,
+              borderRightWidth: 4,
+              borderTopWidth: 0,
+              borderBottomWidth: 53,
+              borderLeftColor: "transparent",
+              borderRightColor: "transparent",
+              borderBottomColor: "#FFFFFF",
+            }}
+          />
         </Animated.View>
       </View>
 
-      <Text style={styles.gaugeValue}>{value}%</Text>
+      <Text className="text-white text-xl font-bold mt-3">{value}%</Text>
     </View>
   );
 };
@@ -161,9 +189,11 @@ const TimeSeriesChart = ({ data }: { data: TimeSeriesDataPoint[] }) => {
   const svgWidth = totalWidth;
 
   return (
-    <View style={styles.chartContainer}>
-      <View style={styles.chartLegend}>
-        <Text style={styles.chartLegendText}>Wave Intensity</Text>
+    <View className="h-[260px] mx-5 bg-white/5 rounded-xl p-4 mb-5">
+      <View className="mb-2">
+        <Text className="text-white text-sm font-bold mb-1">
+          Wave Intensity
+        </Text>
       </View>
 
       <ScrollView
@@ -171,11 +201,11 @@ const TimeSeriesChart = ({ data }: { data: TimeSeriesDataPoint[] }) => {
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ width: totalWidth }}
-        style={styles.scrollableChart}
+        className="flex-1 w-full"
         bounces={false}
         scrollEventThrottle={16}
       >
-        <View style={[styles.chartContent, { width: totalWidth }]}>
+        <View className="flex-1 h-[180px]" style={{ width: totalWidth }}>
           <Svg width="100%" height="100%" viewBox={`0 0 ${svgWidth} 200`}>
             {/* Background grid lines */}
             <Path
@@ -293,7 +323,7 @@ const TimeSeriesChart = ({ data }: { data: TimeSeriesDataPoint[] }) => {
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ width: totalWidth }}
-        style={styles.scrollableXAxis}
+        className="h-5 w-full"
         scrollEnabled={false} // Disabled to sync with main chart
         ref={(ref) => {
           // Sync this ScrollView with the main one
@@ -303,31 +333,30 @@ const TimeSeriesChart = ({ data }: { data: TimeSeriesDataPoint[] }) => {
           }
         }}
       >
-        <View style={[styles.xAxisLabels, { width: totalWidth }]}>
+        <View className="h-5 relative" style={{ width: totalWidth }}>
           {data.map((item, index) => (
             <View
               key={index}
-              style={[
-                styles.xAxisLabelContainer,
-                {
-                  left: chartPadding + index * pointSpacing,
-                  width: pointSpacing,
-                  position: "absolute",
-                  transform: [{ translateX: -pointSpacing / 2 }],
-                },
-              ]}
+              className="items-center absolute"
+              style={{
+                left: chartPadding + index * pointSpacing,
+                width: pointSpacing,
+                transform: [{ translateX: -pointSpacing / 2 }],
+              }}
             >
-              <Text style={styles.barLabel}>{item.time}</Text>
+              <Text className="text-white text-xs opacity-70 text-center">
+                {item.time}
+              </Text>
             </View>
           ))}
         </View>
       </ScrollView>
 
       {/* Scroll indicator dots */}
-      <View style={styles.scrollIndicator}>
-        <View style={styles.scrollIndicatorDot} />
-        <View style={styles.scrollIndicatorDot} />
-        <View style={styles.scrollIndicatorDot} />
+      <View className="flex-row justify-center mt-2">
+        <View className="w-1 h-1 rounded-full bg-white/50 mx-0.5" />
+        <View className="w-1 h-1 rounded-full bg-white/50 mx-0.5" />
+        <View className="w-1 h-1 rounded-full bg-white/50 mx-0.5" />
       </View>
     </View>
   );
@@ -340,11 +369,11 @@ const RecommendationItem = ({
   text: string;
   index: number;
 }) => (
-  <View style={styles.recommendationItem}>
-    <View style={styles.recommendationIcon}>
-      <Text style={styles.recommendationIconText}>{index + 1}</Text>
+  <View className="flex-row items-start mb-3">
+    <View className="w-6 h-6 rounded-full bg-[#4ADE80] justify-center items-center mr-3">
+      <Text className="text-[#050628] text-xs font-bold">{index + 1}</Text>
     </View>
-    <Text style={styles.recommendationText}>{text}</Text>
+    <Text className="text-white text-sm flex-1 leading-5">{text}</Text>
   </View>
 );
 
@@ -396,9 +425,7 @@ export default function AnalyticsScreen() {
       } else {
         // New analysis flow - fetch from API or use mock data for a new test
         try {
-          const response = await axios.get(
-            "http:10.0.2.2:5000/api/analytics"
-          );
+          const response = await axios.get("http:10.0.2.2:5000/api/analytics");
           setData(response.data);
           setIsHistoricalData(false);
         } catch (error) {
@@ -433,51 +460,55 @@ export default function AnalyticsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView className="flex-1 bg-[#050628]">
         <StatusBar style="light" />
-        <View style={styles.loadingContainer}>
+        <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#3563E9" />
-          <Text style={styles.loadingText}>Loading analytics data...</Text>
+          <Text className="text-white mt-2.5 text-base">
+            Loading analytics data...
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-[#050628]">
       <StatusBar style="light" />
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
+      <ScrollView className="flex-1">
+        <View className="flex-row justify-between items-center px-5 pt-2.5 pb-5">
+          <View className="flex-row items-center">
             <BrainIcon size={32} color="#3563E9" filled={true} />
-            <Text style={styles.headerTitle}>NeurAi</Text>
+            <Text className="text-white text-lg font-bold ml-2">NeurAi</Text>
           </View>
-          <View style={styles.profileIconContainer}>
+          <View className="w-9 h-9 rounded-full overflow-hidden">
             <Image
               source={require("../../assets/images/userAvatar.png")}
-              style={styles.profileIcon}
+              className="w-full h-full"
               contentFit="cover"
             />
           </View>
         </View>
 
         {/* Section header with title and possibly a button */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>
+        <View className="flex-row justify-between items-center px-5 mt-4 mb-2">
+          <Text className="text-white text-lg font-bold">
             {isHistoricalData ? "Historical Data" : "Your Live Data"}
           </Text>
 
           <TouchableOpacity
-            style={styles.newAnalysisButton}
+            className="bg-[#3563E9] px-3.5 py-2 rounded-lg shadow-sm"
             onPress={handleTakeNewAnalysis}
           >
-            <Text style={styles.newAnalysisButtonText}>Take New Analysis</Text>
+            <Text className="text-white text-sm font-semibold">
+              Take New Analysis
+            </Text>
           </TouchableOpacity>
         </View>
 
         {data && <TimeSeriesChart data={data.timeSeriesData} />}
 
-        <View style={styles.metricsGrid}>
+        <View className="flex-row flex-wrap justify-between px-5 mb-5">
           {data && (
             <GaugeChart value={data.attentionScore} title="Attention Score" />
           )}
@@ -492,68 +523,78 @@ export default function AnalyticsScreen() {
           )}
         </View>
 
-        <Text style={styles.sectionTitle}>AI Analysis</Text>
+        <Text className="text-white text-lg font-bold my-4 px-5">
+          AI Analysis
+        </Text>
 
-        <View style={styles.analysisContainer}>
-          <Text style={styles.analysisTitle}>Mental State</Text>
+        <View className="mx-5 bg-white/5 rounded-xl p-5 mb-5">
+          <Text className="text-white text-base font-bold mb-4">
+            Mental State
+          </Text>
 
-          <View style={styles.confidenceContainer}>
-            <Text style={styles.confidenceLabel}>Confidence</Text>
-            <Text style={styles.confidenceValue}>{data?.confidence ?? 0}%</Text>
+          <View className="flex-row justify-between items-center mb-2">
+            <Text className="text-[#FACC15] text-sm font-bold">Confidence</Text>
+            <Text className="text-[#FACC15] text-sm font-bold">
+              {data?.confidence ?? 0}%
+            </Text>
           </View>
 
-          <Text style={styles.analysisText}>
+          <Text className="text-white text-sm mb-3">
             {isHistoricalData
               ? "This is an analysis from a previous session"
               : "You seem to be focused"}
           </Text>
 
-          <View style={styles.progressBar}>
+          <View className="h-1.5 bg-white/10 rounded-sm mb-6 overflow-hidden">
             <LinearGradient
               colors={["#FACC15", "#FACC15"]}
-              style={[
-                styles.progressBarFill,
-                { width: `${data?.confidence ?? 0}%` },
-              ]}
+              className="h-full rounded"
+              style={{
+                width: `${data?.confidence ?? 0}%`,
+              }}
             />
           </View>
 
-          <View style={styles.analysisColumns}>
-            <View style={styles.analysisColumn}>
-              <Text style={styles.analysisColumnTitle}>State Distribution</Text>
-              <Text style={styles.statItem}>
+          <View className="flex-row justify-between">
+            <View className="w-[48%]">
+              <Text className="text-white text-sm font-bold mb-3">
+                State Distribution
+              </Text>
+              <Text className="text-white text-xs opacity-80 mb-1.5">
                 Focused: {data?.stateDistribution.focused ?? 0}%
               </Text>
-              <Text style={styles.statItem}>
+              <Text className="text-white text-xs opacity-80 mb-1.5">
                 Relaxed: {data?.stateDistribution.relaxed ?? 0}%
               </Text>
-              <Text style={styles.statItem}>
+              <Text className="text-white text-xs opacity-80 mb-1.5">
                 Neutral: {data?.stateDistribution.neutral ?? 0}%
               </Text>
-              <Text style={styles.statItem}>
+              <Text className="text-white text-xs opacity-80 mb-1.5">
                 Distracted: {data?.stateDistribution.distracted ?? 0}%
               </Text>
             </View>
-            <View style={styles.analysisColumn}>
-              <Text style={styles.analysisColumnTitle}>Cognitive Metrics</Text>
-              <Text style={styles.statItem}>
+            <View className="w-[48%]">
+              <Text className="text-white text-sm font-bold mb-3">
+                Cognitive Metrics
+              </Text>
+              <Text className="text-white text-xs opacity-80 mb-1.5">
                 Attention Score: {data?.attentionScore ?? 0}% (Range: 0 - 100)
               </Text>
-              <Text style={styles.statItem}>
+              <Text className="text-white text-xs opacity-80 mb-1.5">
                 Cognitive Load: {data?.cognitiveLoad ?? 0}% (Range: 0 - 100)
               </Text>
-              <Text style={styles.statItem}>
+              <Text className="text-white text-xs opacity-80 mb-1.5">
                 Mental Fatigue: {data?.mentalFatigue ?? 0}% (Range: 0 - 100)
               </Text>
-              <Text style={styles.statItem}>
+              <Text className="text-white text-xs opacity-80 mb-1.5">
                 Relaxation Level: {data?.relaxationLevel ?? 0}% (Range: 0 - 100)
               </Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.recommendationsContainer}>
-          <Text style={styles.recommendationsTitle}>
+        <View className="mx-5 mb-5">
+          <Text className="text-white text-base font-bold mb-4">
             Clinical Recommendations
           </Text>
           {data?.recommendations.map((recommendation, index) => (
@@ -568,302 +609,3 @@ export default function AnalyticsScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#050628",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    color: "#FFFFFF",
-    marginTop: 10,
-    fontSize: 16,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  brainIcon: {
-    width: 28,
-    height: 28,
-    marginRight: 8,
-  },
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginLeft: 8,
-  },
-  profileIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    overflow: "hidden",
-  },
-  profileIcon: {
-    width: "100%",
-    height: "100%",
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    marginBottom: 8,
-    marginTop: 16,
-  },
-  sectionTitle: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginVertical: 16,
-    paddingHorizontal: 20,
-  },
-  newAnalysisButton: {
-    backgroundColor: "#3563E9",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  newAnalysisButtonText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  chartContainer: {
-    height: 260, // Increased height to accommodate time labels and legend
-    marginHorizontal: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 20,
-  },
-  chartLegend: {
-    marginBottom: 8,
-  },
-  chartLegendText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  scrollableChart: {
-    flex: 1,
-    width: "100%",
-  },
-  chartContent: {
-    flex: 1,
-    height: 180,
-  },
-  scrollableXAxis: {
-    height: 20,
-    width: "100%",
-  },
-  xAxisLabels: {
-    height: 20,
-    position: "relative",
-  },
-  xAxisLabelContainer: {
-    alignItems: "center",
-  },
-  barLabel: {
-    color: "#FFFFFF",
-    fontSize: 10,
-    opacity: 0.7,
-    textAlign: "center",
-  },
-  scrollIndicator: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 8,
-  },
-  scrollIndicatorDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "rgba(255, 255, 255, 0.5)",
-    marginHorizontal: 2,
-  },
-  metricsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  gaugeContainer: {
-    width: "48%",
-    aspectRatio: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-    borderColor: "#3563E9",
-    borderWidth: 1,
-    // backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderRadius: 16,
-    padding: 16,
-  },
-  gaugeOuter: {
-    width: "100%",
-    height: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative",
-    marginVertical: 8,
-  },
-  needle: {
-    position: "absolute",
-    bottom: 6,
-    left: "50%",
-    height: "50%",
-    width: 12,
-    alignItems: "center",
-    justifyContent: "flex-end",
-    transformOrigin: "center bottom",
-    zIndex: 10,
-  },
-  needleTriangle: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 4,
-    borderRightWidth: 4,
-    borderTopWidth: 0,
-    borderBottomWidth: 53,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderBottomColor: "#FFFFFF",
-  },
-  gaugeValue: {
-    color: "#FFFFFF",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginTop: 12,
-  },
-  gaugeTitle: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  analysisContainer: {
-    marginHorizontal: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-  },
-  analysisTitle: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
-  confidenceContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  confidenceLabel: {
-    color: "#FACC15",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  confidenceValue: {
-    color: "#FACC15",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  analysisText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    marginBottom: 12,
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 3,
-    marginBottom: 24,
-    overflow: "hidden",
-  },
-  progressBarFill: {
-    height: "100%",
-    borderRadius: 3,
-  },
-  analysisColumns: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  analysisColumn: {
-    width: "48%",
-  },
-  analysisColumnTitle: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "bold",
-    marginBottom: 12,
-  },
-  statItem: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    opacity: 0.8,
-    marginBottom: 6,
-  },
-  recommendationsContainer: {
-    marginHorizontal: 20,
-    marginBottom: 20,
-  },
-  recommendationsTitle: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
-  recommendationItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 12,
-  },
-  recommendationIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#4ADE80",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  recommendationIconText: {
-    color: "#050628",
-    fontSize: 12,
-    fontWeight: "bold",
-  },
-  recommendationText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    flex: 1,
-    lineHeight: 20,
-  },
-});
