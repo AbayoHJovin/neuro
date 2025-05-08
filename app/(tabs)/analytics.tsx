@@ -1,7 +1,6 @@
 import BrainIcon from "@/components/BrainIcon";
 import { getTestById } from "@/utils/mockData";
 import axios from "axios";
-import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -9,6 +8,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
+  Image,
   SafeAreaView,
   ScrollView,
   Text,
@@ -473,22 +473,21 @@ export default function AnalyticsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#050628]">
+    <SafeAreaView className="flex-1 bg-[#050628] mb-4">
       <StatusBar style="light" />
       <ScrollView className="flex-1">
-        <View className="flex-row justify-between items-center px-5 pt-2.5 pb-5">
-          <View className="flex-row items-center">
-            <BrainIcon size={32} color="#3563E9" filled={true} />
-            <Text className="text-white text-lg font-bold ml-2">NeurAi</Text>
-          </View>
-          <View className="w-9 h-9 rounded-full overflow-hidden">
-            <Image
-              source={require("../../assets/images/userAvatar.png")}
-              className="w-full h-full"
-              contentFit="cover"
-            />
-          </View>
+         <View className="flex-row justify-between items-center pt-4 px-4 mb-6">
+        <View className="flex-row items-center">
+          <BrainIcon size={32} color="#3563E9" filled={true} />
+          <Text className="text-white text-xl font-bold ml-2">NeurAi</Text>
         </View>
+        <View className="w-10 h-10 rounded-full overflow-hidden bg-[#25294A]">
+          <Image
+            source={require("@/assets/images/userAvatar.png")}
+            className="w-full h-full rounded-full"
+          />
+        </View>
+      </View>
 
         {/* Section header with title and possibly a button */}
         <View className="flex-row justify-between items-center px-5 mt-4 mb-2">
@@ -593,7 +592,7 @@ export default function AnalyticsScreen() {
           </View>
         </View>
 
-        <View className="mx-5 mb-5">
+        <View className="mx-5 mb-16">
           <Text className="text-white text-base font-bold mb-4">
             Clinical Recommendations
           </Text>

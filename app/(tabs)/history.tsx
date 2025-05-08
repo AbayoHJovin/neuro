@@ -149,7 +149,6 @@ export default function HistoryScreen() {
           <Image
             source={require("../../assets/images/userAvatar.png")}
             className="w-full h-full rounded-full"
-            // style={{ width: 40, height: 40 }}
           />
         </View>
       </View>
