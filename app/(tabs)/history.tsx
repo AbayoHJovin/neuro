@@ -1,20 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import BrainIcon from "@/components/BrainIcon";
 import DateSelector from "@/components/DateSelector";
 import TestCard from "@/components/History/TestCard";
 import SearchBar from "@/components/SearchBar";
+import SafeAreaForTabs from "@/components/ui/SafeAreaForTabs";
 import { getAllTests, TestResult } from "@/utils/mockData";
 
 // Helper to check if dates are on the same day
@@ -145,34 +138,32 @@ export default function HistoryScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaForTabs className="bg-[#050628] px-4 pt-4">
       <StatusBar style="light" />
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <BrainIcon size={32} color="#3563E9" filled={true} />
-            <Text style={styles.headerTitle}>NeurAi</Text>
-          </View>
-          <View style={styles.profileIconContainer}>
-            <Image
-              source={require("../../assets/images/userAvatar.png")}
-              style={styles.profileIcon}
-            />
-          </View>
+      <View className="flex-row justify-between items-center pt-4 px-4 mb-6">
+        <View className="flex-row items-center">
+          <BrainIcon size={32} color="#3563E9" filled={true} />
+          <Text className="text-white text-xl font-bold ml-2">NeurAi</Text>
         </View>
+        <View className="w-10 h-10 rounded-full overflow-hidden bg-[#25294A]">
+          <Image
+            source={require("../../assets/images/userAvatar.png")}
+            className="w-full h-full rounded-full"
+            // style={{ width: 40, height: 40 }}
+          />
+        </View>
+      </View>
 
-        <View style={styles.titleRow}>
-          <Text style={styles.sectionTitle}>Session History</Text>
+      <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
+        <View className="flex-row justify-between items-center mb-4">
+          <Text className="text-white text-2xl font-bold">Session History</Text>
           <DateSelector
             onDateChange={handleDateChange}
             selectedDate={selectedDate}
           />
         </View>
 
-        <View style={styles.searchContainer}>
+        <View className="mb-6">
           <SearchBar
             placeholder="Search Session"
             value={searchQuery}
@@ -185,8 +176,8 @@ export default function HistoryScreen() {
           <>
             {Object.keys(groupedTests).map((dateGroup) => (
               <View key={dateGroup}>
-                <View style={styles.dateHeaderContainer}>
-                  <Text style={styles.dateHeader}>
+                <View className="mb-4 mt-2">
+                  <Text className="text-white text-base font-semibold">
                     {new Date(dateGroup).toLocaleDateString("en-US", {
                       weekday: "long",
                       month: "long",
@@ -208,12 +199,14 @@ export default function HistoryScreen() {
             ))}
           </>
         ) : (
-          <View style={styles.emptyContainer}>
-            <View style={styles.iconContainer}>
+          <View className="flex-1 justify-center items-center py-20">
+            <View className="w-30 h-30 rounded-full bg-[rgba(53,99,233,0.1)] justify-center items-center mb-8">
               <Ionicons name="calendar-outline" size={60} color="#3563E9" />
             </View>
-            <Text style={styles.emptyTitle}>No Sessions Found</Text>
-            <Text style={styles.emptySubtitle}>
+            <Text className="text-white text-2xl font-bold mb-2">
+              No Sessions Found
+            </Text>
+            <Text className="text-white text-base opacity-70 text-center max-w-[80%]">
               {isFiltered
                 ? `No brain analysis sessions found for ${selectedDate.toLocaleDateString(
                     "en-US",
@@ -227,117 +220,17 @@ export default function HistoryScreen() {
             </Text>
             {isFiltered && (
               <TouchableOpacity
-                style={styles.resetButton}
+                className="bg-[#3563E9] px-6 py-3 rounded-lg mt-5"
                 onPress={resetFilters}
               >
-                <Text style={styles.resetButtonText}>Reset Filters</Text>
+                <Text className="text-white text-base font-semibold">
+                  Reset Filters
+                </Text>
               </TouchableOpacity>
             )}
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </SafeAreaForTabs>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#050628",
-  },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 16,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 16,
-    marginBottom: 24,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 8,
-  },
-  profileIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    overflow: "hidden",
-    backgroundColor: "#25294A",
-  },
-  profileIcon: {
-    width: "100%",
-    height: "100%",
-  },
-  titleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  searchContainer: {
-    marginBottom: 24,
-  },
-  dateHeaderContainer: {
-    marginBottom: 16,
-    marginTop: 8,
-  },
-  dateHeader: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 80,
-  },
-  iconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: "rgba(53, 99, 233, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 30,
-  },
-  emptyTitle: {
-    color: "#FFFFFF",
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  emptySubtitle: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    opacity: 0.7,
-    textAlign: "center",
-    maxWidth: "80%",
-  },
-  resetButton: {
-    backgroundColor: "#3563E9",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 20,
-  },
-  resetButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

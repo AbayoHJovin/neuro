@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 type TestCardProps = {
   id: string;
@@ -34,7 +34,6 @@ const TestCard = ({
   // Choose gradient colors based on mental state
   const getGradientColors = () => {
     return ["#242a70", "#091052"] as const; // Blue gradient
-
   };
 
   // Choose label color based on mental state
@@ -60,73 +59,37 @@ const TestCard = ({
       colors={getGradientColors()}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={styles.container}
+      className="mb-4 rounded-2xl overflow-hidden"
     >
-      <View style={styles.content}>
-        <Text style={[styles.label, { color: getLabelColor() }]}>{label}</Text>
-        <Text style={styles.description}>{description}</Text>
-        <View style={styles.footer}>
-          <View style={styles.timeContainer}>
+      <View className="p-4">
+        <Text
+          className="text-lg font-bold mb-2"
+          style={{ color: getLabelColor() }}
+        >
+          {label}
+        </Text>
+        <Text className="text-white opacity-80 text-sm mb-4">
+          {description}
+        </Text>
+        <View className="flex-row justify-between items-center">
+          <View className="flex-row items-center">
             <Ionicons
               name="time-outline"
               size={16}
               color="#FFFFFF"
-              style={styles.timeIcon}
+              className="mr-1 opacity-70"
             />
-            <Text style={styles.timestamp}>{timestamp}</Text>
+            <Text className="text-white opacity-70 text-sm">{timestamp}</Text>
           </View>
           <Pressable onPress={handleReadMore}>
-            <Text style={styles.readMore}>Read More</Text>
+            <Text className="text-[#FFD700] font-semibold text-sm">
+              Read More
+            </Text>
           </Pressable>
         </View>
       </View>
     </LinearGradient>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  content: {
-    padding: 16,
-  },
-  label: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  description: {
-    color: "#FFFFFF",
-    opacity: 0.8,
-    fontSize: 14,
-    marginBottom: 16,
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  timeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  timeIcon: {
-    marginRight: 4,
-    opacity: 0.7,
-  },
-  timestamp: {
-    color: "#FFFFFF",
-    opacity: 0.7,
-    fontSize: 14,
-  },
-  readMore: {
-    color: "#FFD700",
-    fontWeight: "600",
-    fontSize: 14,
-  },
-});
 
 export default TestCard;
