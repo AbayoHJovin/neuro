@@ -8,7 +8,7 @@ import TypingIndicator from "@/components/TypingIndicator";
 import SafeAreaForTabs from "@/components/ui/SafeAreaForTabs";
 import apiService, { ChatHistoryItem } from "@/services/api";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -210,11 +210,11 @@ export default function ChatScreen() {
     }
   };
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (flatListRef.current && messages.length > 0) {
       flatListRef.current.scrollToEnd({ animated: true });
     }
-  };
+  }, [messages.length]);
 
   const handleScroll = (event: any) => {
     const currentPosition = event.nativeEvent.contentOffset.y;
@@ -238,19 +238,18 @@ export default function ChatScreen() {
     return () => {
       keyboardDidShowListener.remove();
     };
-  }, []);
+  }, [scrollToBottom]);
 
   // Auto-scroll when a new message is added
   useEffect(() => {
     if (!showScrollToBottom) {
       scrollToBottom();
     }
-  }, [messages]);
+  }, [messages, showScrollToBottom, scrollToBottom]);
 
   return (
     <SafeAreaForTabs className="bg-[#050628] px-4 pt-4">
       <StatusBar style="light" />
-
       <View className="flex-row justify-between items-center px-5 pt-2.5 pb-5">
         <View className="flex-row items-center">
           <BrainIcon size={32} color="#3563E9" filled={true} />

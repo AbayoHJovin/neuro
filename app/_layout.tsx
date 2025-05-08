@@ -15,8 +15,8 @@ import "../global.css";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import CustomSplashScreen from "@/screens/Splash/SplashScreen";
 
-// Prevent the native splash screen from auto-hiding
-// This is important - we'll manually hide it once our custom splash is ready
+// Keep the splash screen visible while we fetch resources
+// This ensures a smooth transition from native splash to custom splash
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* reloading the app might trigger some race conditions, ignore them */
 });
@@ -33,7 +33,8 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
-      // Immediately hide any remaining native splash screen
+      // Once fonts are loaded, hide the native splash screen
+      // This will reveal our custom splash screen component
       SplashScreen.hideAsync().catch(() => {
         /* reloading the app might trigger some race conditions, ignore them */
       });
@@ -44,9 +45,9 @@ export default function RootLayout() {
     setShowCustomSplash(false);
   };
 
-  // If fonts are not loaded, show our custom splash screen as a loading indicator
+  // If fonts are not loaded, return null - the native splash screen will stay visible
   if (!loaded) {
-    return <CustomSplashScreen />;
+    return null;
   }
 
   // If fonts are loaded but we're still in the splash phase, show the animated splash

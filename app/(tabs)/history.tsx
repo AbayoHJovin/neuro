@@ -71,7 +71,7 @@ export default function HistoryScreen() {
     };
 
     fetchData();
-  }, []);
+  }, [searchQuery,selectedDate]);
 
   // Filter and group tests based on search query and selected date
   const applyFilters = (
