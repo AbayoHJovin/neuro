@@ -151,6 +151,13 @@ const chatHistoryData = [
   },
 ];
 
+// Mock user profile data
+let userProfile = {
+  fullName: "Dushimire Aine",
+  email: "ainedushimire@gmail.com",
+  profilePicture: "https://randomuser.me/api/portraits/men/36.jpg",
+};
+
 // API route to get chat history
 app.get("/api/chat/history", (req, res) => {
   // Return just the metadata for the history list
@@ -274,6 +281,48 @@ app.post("/api/signup", (req, res) => {
     success: true,
     message: "User registered successfully",
     user: { id: "user_" + Date.now(), fullName, email },
+  });
+});
+
+// API endpoint for profile update
+app.post("/api/update", (req, res) => {
+  const { fullName, email, profilePicture } = req.body;
+
+  // Validate inputs
+  if (!fullName && !email && !profilePicture) {
+    return res.status(400).json({
+      success: false,
+      message: "No update data provided",
+    });
+  }
+
+  // In a real app, validate and save to database
+  if (fullName) userProfile.fullName = fullName;
+  if (email) userProfile.email = email;
+  if (profilePicture) userProfile.profilePicture = profilePicture;
+
+  // Simulate potential failure (1 in 10 chance)
+  const shouldFail = Math.random() < 0.1;
+  if (shouldFail) {
+    return res.status(500).json({
+      success: false,
+      message: "Update failed. Please try again.",
+    });
+  }
+
+  // Return success response
+  res.json({
+    success: true,
+    message: "Your profile has been updated successfully.",
+    profile: userProfile,
+  });
+});
+
+// API endpoint to get user profile
+app.get("/api/profile", (req, res) => {
+  res.json({
+    success: true,
+    profile: userProfile,
   });
 });
 

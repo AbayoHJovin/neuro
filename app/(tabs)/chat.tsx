@@ -16,7 +16,6 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -249,19 +248,19 @@ export default function ChatScreen() {
   }, [messages]);
 
   return (
-    <SafeAreaForTabs className="bg-[#050628]">
+    <SafeAreaForTabs className="bg-[#050628] px-4 pt-4">
       <StatusBar style="light" />
 
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
+      <View className="flex-row justify-between items-center px-5 pt-2.5 pb-5">
+        <View className="flex-row items-center">
           <BrainIcon size={32} color="#3563E9" filled={true} />
-          <Text style={styles.headerTitle}>NeurAi</Text>
+          <Text className="text-white text-lg font-bold ml-2">NeurAi</Text>
         </View>
         <View className="flex-row items-center">
-          <View style={styles.profileIconContainer}>
+          <View className="w-9 h-9 rounded-full overflow-hidden">
             <Image
               source={require("../../assets/images/userAvatar.png")}
-              style={styles.profileIcon}
+              className="w-full h-full"
               resizeMode="cover"
             />
           </View>
@@ -353,34 +352,3 @@ export default function ChatScreen() {
     </SafeAreaForTabs>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  profileIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    overflow: "hidden",
-  },
-  profileIcon: {
-    width: "100%",
-    height: "100%",
-  },
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginLeft: 8,
-  },
-});
