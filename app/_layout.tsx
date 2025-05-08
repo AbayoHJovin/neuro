@@ -8,13 +8,14 @@ import { SplashScreen as RouterSplashScreen, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
 import "react-native-reanimated";
 import "../global.css";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import CustomSplashScreen from "@/screens/Splash/SplashScreen";
 
-// Prevent the native splash screen from auto-hiding 
+// Prevent the native splash screen from auto-hiding
 // This is important - we'll manually hide it once our custom splash is ready
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* reloading the app might trigger some race conditions, ignore them */
@@ -55,24 +56,45 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack initialRouteName="onboarding">
-        <Stack.Screen
-          name="onboarding"
-          options={{
-            headerShown: false,
-            animation: "fade",
-          }}
-        />
-        <Stack.Screen
-          name="(tabs)"
-          options={{
-            headerShown: false,
-            animation: "slide_from_right",
-          }}
-        />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
+      {/* Dark background that covers entire app */}
+      <View style={styles.backgroundLayer} />
+
+      <View style={styles.container}>
+        <Stack initialRouteName="onboarding">
+          <Stack.Screen
+            name="onboarding"
+            options={{
+              headerShown: false,
+              animation: "fade",
+            }}
+          />
+          <Stack.Screen
+            name="(tabs)"
+            options={{
+              headerShown: false,
+              animation: "slide_from_right",
+            }}
+          />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+      </View>
+      <StatusBar style="light" />
     </ThemeProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+  backgroundLayer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#050628",
+    zIndex: -1,
+  },
+});

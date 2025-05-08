@@ -1,46 +1,24 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
 
 import AnalyticsIcon from "@/assets/svg/AnalyticsIcon";
 import ChatIcon from "@/assets/svg/ChatIcon";
 import HistoryTabIcon from "@/assets/svg/HistoryTabIcon";
-import HomeIcon from "@/assets/svg/HomeIcon";
 import ProfileIcon from "@/assets/svg/ProfileIcon";
-import { HapticTab } from "@/components/HapticTab";
-import TabBarBackground from "@/components/ui/TabBarBackground";
 import BrainIcon from "@/components/BrainIcon";
+import CustomTabBar from "@/components/ui/CustomTabBar";
+
+const ICON_SIZE = 22; // Consistent icon size
 
 export default function TabLayout() {
   return (
     <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
         tabBarActiveTintColor: "#3563E9",
         tabBarInactiveTintColor: "#6D6D6D",
-        tabBarStyle: {
-          backgroundColor: "#040429",
-          height: 60,
-          borderTopWidth: 0,
-          ...Platform.select({
-            ios: {
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: -2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-            },
-            android: {
-              elevation: 8,
-            },
-          }),
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "500",
-          marginBottom: 5,
-        },
       }}
     >
       <Tabs.Screen
@@ -48,7 +26,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, focused }) => (
-            <BrainIcon color={color} filled={focused} />
+            <BrainIcon color={color} filled={focused} size={ICON_SIZE} />
           ),
           tabBarLabel: ({ color, focused }) => (
             <Text
@@ -66,7 +44,9 @@ export default function TabLayout() {
         name="analytics"
         options={{
           title: "Analytics",
-          tabBarIcon: ({ color }) => <AnalyticsIcon color={color} />,
+          tabBarIcon: ({ color }) => (
+            <AnalyticsIcon color={color} width={ICON_SIZE} height={ICON_SIZE} />
+          ),
           tabBarLabel: ({ color, focused }) => (
             <Text
               style={[
@@ -83,7 +63,13 @@ export default function TabLayout() {
         name="history"
         options={{
           title: "History",
-          tabBarIcon: ({ color }) => <HistoryTabIcon color={color} />,
+          tabBarIcon: ({ color }) => (
+            <HistoryTabIcon
+              color={color}
+              width={ICON_SIZE}
+              height={ICON_SIZE}
+            />
+          ),
           tabBarLabel: ({ color, focused }) => (
             <Text
               style={[
@@ -101,7 +87,12 @@ export default function TabLayout() {
         options={{
           title: "Chat",
           tabBarIcon: ({ color, focused }) => (
-            <ChatIcon color={color} filled={focused} />
+            <ChatIcon
+              color={color}
+              filled={focused}
+              width={ICON_SIZE}
+              height={ICON_SIZE}
+            />
           ),
           tabBarLabel: ({ color, focused }) => (
             <Text
@@ -119,7 +110,9 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color }) => <ProfileIcon color={color} />,
+          tabBarIcon: ({ color }) => (
+            <ProfileIcon color={color} width={ICON_SIZE} height={ICON_SIZE} />
+          ),
           tabBarLabel: ({ color, focused }) => (
             <Text
               style={[
@@ -139,6 +132,7 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   label: {
     fontSize: 12,
-    marginBottom: 2,
+    marginTop: 4,
+    textAlign: "center",
   },
 });

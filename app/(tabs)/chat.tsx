@@ -1,10 +1,11 @@
-import HistoryIcon from "@/assets/svg/history";
+import HistoryIcon from "@/assets/svg/HistoryIcon";
 import ScrollToBottomIcon from "@/assets/svg/ScrollToBottomIcon";
 import SendIcon from "@/assets/svg/SendIcon";
 import BrainIcon from "@/components/BrainIcon";
 import ChatHistoryModal from "@/components/History/ChatHistoryModal";
 import MessageBubble from "@/components/MessageBubble";
 import TypingIndicator from "@/components/TypingIndicator";
+import SafeAreaForTabs from "@/components/ui/SafeAreaForTabs";
 import apiService, { ChatHistoryItem } from "@/services/api";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef, useState } from "react";
@@ -15,7 +16,6 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
@@ -249,7 +249,7 @@ export default function ChatScreen() {
   }, [messages]);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#050628]">
+    <SafeAreaForTabs className="bg-[#050628]">
       <StatusBar style="light" />
 
       <View style={styles.header}>
@@ -272,7 +272,7 @@ export default function ChatScreen() {
       <View className="flex-row items-center justify-between px-5 mb-3">
         <Text className="text-white text-2xl font-bold">Ai Assistant</Text>
         <TouchableOpacity onPress={handleOpenHistory} activeOpacity={0.7}>
-          <HistoryIcon />
+          <HistoryIcon color="#3563E9" width={24} height={24} />
         </TouchableOpacity>
       </View>
 
@@ -292,6 +292,7 @@ export default function ChatScreen() {
         contentContainerStyle={{ paddingVertical: 16 }}
         onScroll={handleScroll}
         scrollEventThrottle={400}
+        style={{ zIndex: 0 }}
       />
 
       {/* Typing Indicator */}
@@ -312,7 +313,7 @@ export default function ChatScreen() {
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 70}
-        className="border-t border-t-white/10 p-3"
+        className="p-3"
       >
         <View className="flex-row items-center rounded-lg border border-[#1D4FD7] px-4 py-1">
           <TextInput
@@ -349,7 +350,7 @@ export default function ChatScreen() {
         onSelectChat={handleSelectChat}
         onNewChat={handleNewChat}
       />
-    </SafeAreaView>
+    </SafeAreaForTabs>
   );
 }
 
