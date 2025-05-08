@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Define base URL for API
-const API_URL = "http://localhost:5000";
+const API_URL = "http:10.0.2.2:5000";
 
 // Define types for the data
 export interface BrainData {
@@ -37,6 +37,39 @@ export interface HomeData {
   liveData: BrainData[];
   mentalState: MentalStateData;
   recommendations: Recommendation[];
+}
+
+// Define chat history types
+export interface ChatHistoryItem {
+  id: string;
+  title: string;
+  timestamp: string;
+  lastMessageSnippet: string;
+}
+
+export interface ChatHistory {
+  success: boolean;
+  history: ChatHistoryItem[];
+}
+
+export interface Message {
+  id: string;
+  text: string;
+  isUser: boolean;
+  timestamp: string;
+}
+
+export interface ChatDetail {
+  id: string;
+  title: string;
+  timestamp: string;
+  lastMessageSnippet: string;
+  messages: Message[];
+}
+
+export interface ChatDetailResponse {
+  success: boolean;
+  chat: ChatDetail;
 }
 
 // Mock data for fallback
@@ -103,6 +136,32 @@ const apiService = {
     } catch (error) {
       console.log("Error fetching live brain data, using mock data:", error);
       return MOCK_DATA.liveData;
+    }
+  },
+
+  // Get chat history
+  getChatHistory: async (): Promise<ChatHistoryItem[]> => {
+    try {
+      const response = await axios.get<ChatHistory>(
+        `${API_URL}/api/chat/history`
+      );
+      return response.data.history;
+    } catch (error) {
+      console.log("Error fetching chat history:", error);
+      return [];
+    }
+  },
+
+  // Get specific chat by ID
+  getChatById: async (chatId: string): Promise<ChatDetail | null> => {
+    try {
+      const response = await axios.get<ChatDetailResponse>(
+        `${API_URL}/api/chat/history/${chatId}`
+      );
+      return response.data.chat;
+    } catch (error) {
+      console.log("Error fetching chat details:", error);
+      return null;
     }
   },
 };

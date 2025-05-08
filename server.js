@@ -3,8 +3,21 @@ const cors = require("cors");
 const app = express();
 const PORT = 5000;
 
-// Enable CORS for all routes
-app.use(cors());
+// Enable CORS for all routes with specific configuration for mobile app
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:8081",
+      "exp://*",
+      "https://*",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Mock analytics data
@@ -35,6 +48,145 @@ const analyticsData = {
   ],
 };
 
+// Mock chat history data
+const chatHistoryData = [
+  {
+    id: "1",
+    title: "Understanding EEG Patterns",
+    timestamp: "2023-12-15T14:30:00Z",
+    lastMessageSnippet:
+      "In research settings, EEG helps understand brain function and cognitive processes.",
+    messages: [
+      {
+        id: "m1",
+        text: "Can you explain how EEG works?",
+        isUser: true,
+        timestamp: "2:30 PM",
+      },
+      {
+        id: "m2",
+        text: "EEG (Electroencephalography) is a method to record electrical activity of the brain. It's commonly used to diagnose and monitor neurological conditions.",
+        isUser: false,
+        timestamp: "2:31 PM",
+      },
+      {
+        id: "m3",
+        text: "What kind of patterns should I look for?",
+        isUser: true,
+        timestamp: "2:33 PM",
+      },
+      {
+        id: "m4",
+        text: "The procedure involves placing electrodes on the scalp to detect electrical signals produced by brain cell activity. It can help identify seizures, sleep disorders, and other brain abnormalities. In research settings, EEG helps understand brain function and cognitive processes.",
+        isUser: false,
+        timestamp: "2:34 PM",
+      },
+    ],
+  },
+  {
+    id: "2",
+    title: "Stress Management Techniques",
+    timestamp: "2023-12-16T09:15:00Z",
+    lastMessageSnippet:
+      "Managing stress through mindfulness, exercise, and proper rest is important for overall well-being.",
+    messages: [
+      {
+        id: "m1",
+        text: "I've been feeling really stressed lately. Any advice?",
+        isUser: true,
+        timestamp: "9:15 AM",
+      },
+      {
+        id: "m2",
+        text: "Stress is your body's reaction to pressure from a certain situation or event. It can manifest as physical, mental, or emotional strain causing bodily or mental tension.",
+        isUser: false,
+        timestamp: "9:16 AM",
+      },
+      {
+        id: "m3",
+        text: "How can I manage it better?",
+        isUser: true,
+        timestamp: "9:18 AM",
+      },
+      {
+        id: "m4",
+        text: "Short-term stress can sometimes be beneficial, helping you stay focused and alert. However, chronic stress can have negative effects on your health. Managing stress through mindfulness, exercise, and proper rest is important for overall well-being.",
+        isUser: false,
+        timestamp: "9:19 AM",
+      },
+    ],
+  },
+  {
+    id: "3",
+    title: "Mental Health Basics",
+    timestamp: "2023-12-17T16:45:00Z",
+    lastMessageSnippet:
+      "Regular exercise, healthy eating, and adequate sleep all contribute to better mental health.",
+    messages: [
+      {
+        id: "m1",
+        text: "What are the basics of good mental health?",
+        isUser: true,
+        timestamp: "4:45 PM",
+      },
+      {
+        id: "m2",
+        text: "Mental health refers to cognitive, behavioral, and emotional well-being. It affects how we think, feel, and behave, and determines how we handle stress.",
+        isUser: false,
+        timestamp: "4:46 PM",
+      },
+      {
+        id: "m3",
+        text: "What can I do to improve my mental health?",
+        isUser: true,
+        timestamp: "4:48 PM",
+      },
+      {
+        id: "m4",
+        text: "Good mental health is not just the absence of mental health problems. It's about maintaining a positive state of mind and taking care of your psychological well-being. Regular exercise, healthy eating, and adequate sleep all contribute to better mental health.",
+        isUser: false,
+        timestamp: "4:49 PM",
+      },
+    ],
+  },
+];
+
+// API route to get chat history
+app.get("/api/chat/history", (req, res) => {
+  // Return just the metadata for the history list
+  const historySummaries = chatHistoryData.map(
+    ({ id, title, timestamp, lastMessageSnippet }) => ({
+      id,
+      title,
+      timestamp,
+      lastMessageSnippet,
+    })
+  );
+
+  res.json({
+    success: true,
+    history: historySummaries,
+  });
+});
+
+// API route to get a specific chat by ID
+app.get("/api/chat/history/:id", (req, res) => {
+  const chatId = req.params.id;
+  const chat = chatHistoryData.find((chat) => chat.id === chatId);
+
+  if (!chat) {
+    return res.status(404).json({
+      success: false,
+      message: "Chat not found",
+    });
+  }
+
+  res.json({
+    success: true,
+    chat,
+  });
+});
+
 // API route to serve analytics data
 app.get("/api/analytics", (req, res) => {
   // Simulate a delay to show loading state
@@ -43,10 +195,10 @@ app.get("/api/analytics", (req, res) => {
   }, 1000);
 });
 
-// Chat API endpoint to handle user messages
+// Chat API endpoint to handle user messages with streaming chunks
 app.post("/api/chat", (req, res) => {
   const { message } = req.body;
-  try{
+
   if (!message) {
     return res.status(400).json({
       success: false,
@@ -57,38 +209,49 @@ app.post("/api/chat", (req, res) => {
   // Log received message
   console.log("Received message:", message);
 
-  // Sample responses based on message content
-  let aiResponse = "";
+  // Sample responses based on message content with chunks
+  let responseChunks = [];
 
   if (message.toLowerCase().includes("eeg")) {
-    aiResponse =
-      "EEG (Electroencephalography) is a method to record electrical activity of the brain. It's commonly used to diagnose and monitor neurological conditions and to understand brain function in research settings.";
+    responseChunks = [
+      "EEG (Electroencephalography) is a method to record electrical activity of the brain.",
+      "It's commonly used to diagnose and monitor neurological conditions.",
+      "The procedure involves placing electrodes on the scalp to detect the electrical signals produced by brain cell activity.",
+      "It can help identify seizures, sleep disorders, and other brain abnormalities.",
+      "In research settings, EEG helps understand brain function and cognitive processes.",
+    ];
   } else if (message.toLowerCase().includes("mental health")) {
-    aiResponse =
-      "Mental health refers to cognitive, behavioral, and emotional well-being. It affects how we think, feel, and behave, and also determines how we handle stress, relate to others, and make choices.";
+    responseChunks = [
+      "Mental health refers to cognitive, behavioral, and emotional well-being.",
+      "It affects how we think, feel, and behave, and determines how we handle stress.",
+      "Good mental health is not just the absence of mental health problems.",
+      "It's about maintaining a positive state of mind and taking care of your psychological well-being.",
+      "Regular exercise, healthy eating, and adequate sleep all contribute to better mental health.",
+    ];
   } else if (message.toLowerCase().includes("stress")) {
-    aiResponse =
-      "Stress is your body's reaction to pressure from a certain situation or event. It can be a physical, mental, or emotional strain causing bodily or mental tension.";
+    responseChunks = [
+      "Stress is your body's reaction to pressure from a certain situation or event.",
+      "It can manifest as physical, mental, or emotional strain causing bodily or mental tension.",
+      "Short-term stress can sometimes be beneficial, helping you stay focused and alert.",
+      "However, chronic stress can have negative effects on your health.",
+      "Managing stress through mindfulness, exercise, and proper rest is important for overall well-being.",
+    ];
   } else {
-    aiResponse =
-      "I'm your NeuroLab AI assistant. I'm here to help you with understanding brain function, mental health, and cognitive science. How can I assist you today?";
+    responseChunks = [
+      "I'm your NeuroLab AI assistant.",
+      "I specialize in topics related to brain function, mental health, and cognitive science.",
+      "You can ask me questions about neurological conditions, brain activity, or mental wellness practices.",
+      "I'm designed to provide helpful information based on current scientific understanding.",
+      "How can I assist you with your specific questions or concerns today?",
+    ];
   }
 
-  // Return the AI response with a slight delay to simulate processing
-  setTimeout(() => {
-    res.json({
-      success: true,
-      response: aiResponse,
-      timestamp: new Date().toISOString(),
-    });
-  }, 800);
-  } catch (error) {
-    console.error("Error in chat API:", error);
-    res.status(500).json({
-      success: false,
-      message: "An error occurred while processing the message",
-    });
-  }
+  // Return the AI response with chunks for the frontend to display
+  res.json({
+    success: true,
+    responseChunks: responseChunks,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Signup route from previous implementation

@@ -4,7 +4,7 @@ import { Platform, StyleSheet, Text } from "react-native";
 
 import AnalyticsIcon from "@/assets/svg/AnalyticsIcon";
 import ChatIcon from "@/assets/svg/ChatIcon";
-import HistoryIcon from "@/assets/svg/HistoryIcon";
+import HistoryTabIcon from "@/assets/svg/HistoryTabIcon";
 import HomeIcon from "@/assets/svg/HomeIcon";
 import ProfileIcon from "@/assets/svg/ProfileIcon";
 import { HapticTab } from "@/components/HapticTab";
@@ -83,7 +83,7 @@ export default function TabLayout() {
         name="history"
         options={{
           title: "History",
-          tabBarIcon: ({ color }) => <HistoryIcon color={color} />,
+          tabBarIcon: ({ color }) => <HistoryTabIcon color={color} />,
           tabBarLabel: ({ color, focused }) => (
             <Text
               style={[

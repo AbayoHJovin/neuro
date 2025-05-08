@@ -397,7 +397,7 @@ export default function AnalyticsScreen() {
         // New analysis flow - fetch from API or use mock data for a new test
         try {
           const response = await axios.get(
-            "http://localhost:5000/api/analytics"
+            "http:10.0.2.2:5000/api/analytics"
           );
           setData(response.data);
           setIsHistoricalData(false);
